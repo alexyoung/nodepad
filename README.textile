@@ -2,6 +2,10 @@ h3. Nodepad
 
 This is a Node notepad, written for a tutorial series on "DailyJS":http://dailyjs.com.
 
+h3. Updates
+
+Follow the series on "DailyJS":http://dailyjs.com, "@dailyjs":http://twitter.com/dailyjs, or "@alex_young":http://twitter.com/alex_young.
+
 h3. Dependencies
 
 * "Node":http://nodejs.org/
