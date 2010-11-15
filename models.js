@@ -1,10 +1,11 @@
 var mongoose = require('mongoose').Mongoose;
 
 mongoose.model('Document', {
-  properties: ['title', 'data', 'tags'],
+  properties: ['title', 'data', 'tags', 'user_id'],
 
   indexes: [
-    'title'
+    'title',
+    'user_id'
   ]
 });
 
