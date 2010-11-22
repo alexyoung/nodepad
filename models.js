@@ -6,7 +6,13 @@ mongoose.model('Document', {
   indexes: [
     'title',
     'user_id'
-  ]
+  ],
+
+  getters: {
+    id: function() {
+      return this._id.toHexString();
+    }
+  }
 });
 
 exports.Document = function(db) {

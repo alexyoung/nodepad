@@ -1,0 +1,13 @@
+h1 Your Documents
+
+p
+  a(class='button', href='/documents/new') + New Document
+
+ul
+  - for (var d in documents)
+    li
+      a(class='button', href='/documents/' + documents[d].id + '/edit') Edit
+      a(class='button destroy', href='/documents/' + documents[d].id) Delete
+      a(href='/documents/' + documents[d].id)
+        =documents[d].title
+

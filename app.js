@@ -26,6 +26,7 @@ app.configure('production', function() {
 });
 
 app.configure('test', function() {
+  app.use(express.logger());
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   db = mongoose.connect('mongodb://localhost/nodepad-test');
 });
@@ -33,15 +34,11 @@ app.configure('test', function() {
 app.Document = Document = require('./models.js').Document(db);
 
 app.get('/', function(req, res) {
-  res.render('index.jade', {
-    locals: {
-        title: 'Express'
-    }
-  });
+  res.redirect('/documents')
 });
 
 // Document list
-app.get('/documents.:format', function(req, res) {
+app.get('/documents.:format?', function(req, res) {
   Document.find().all(function(documents) {
     switch (req.params.format) {
       case 'json':
@@ -51,18 +48,34 @@ app.get('/documents.:format', function(req, res) {
       break;
 
       default:
-        res.render('documents/index.jade');
+        res.render('documents/index.jade', {
+          locals: { documents: documents }
+        });
     }
+  });
+});
+
+app.get('/documents/:id.:format?/edit', function(req, res) {
+  Document.findById(req.params.id, function(d) {
+    res.render('documents/edit.jade', {
+      locals: { d: d }
+    });
+  });
+});
+
+app.get('/documents/new', function(req, res) {
+  res.render('documents/new.jade', {
+    locals: { d: new Document() }
   });
 });
 
 // Create document 
 app.post('/documents.:format?', function(req, res) {
-  var document = new Document(req.body['document']);
-  document.save(function() {
+  var d = new Document(req.body.document);
+  d.save(function() {
     switch (req.params.format) {
       case 'json':
-        res.send(document.__doc);
+        res.send(d.__doc);
        break;
 
        default:
@@ -73,14 +86,52 @@ app.post('/documents.:format?', function(req, res) {
 
 // Read document
 app.get('/documents/:id.:format?', function(req, res) {
+  Document.findById(req.params.id, function(d) {
+    switch (req.params.format) {
+      case 'json':
+        res.send(d.__doc);
+      break;
+
+      default:
+        res.render('documents/show.jade', {
+          locals: { d: d }
+        });
+    }
+  });
 });
 
 // Update document
 app.put('/documents/:id.:format?', function(req, res) {
+  Document.findById(req.body.document.id, function(d) {
+    d.title = req.body.document.title;
+    d.data = req.body.document.data;
+    d.save(function() {
+      switch (req.params.format) {
+        case 'json':
+          res.send(d.__doc);
+         break;
+
+         default:
+          res.redirect('/documents');
+      }
+    });
+  });
 });
 
 // Delete document
 app.del('/documents/:id.:format?', function(req, res) {
+  Document.findById(req.params.id, function(d) {
+    d.remove(function() {
+      switch (req.params.format) {
+        case 'json':
+          res.send('true');
+         break;
+
+         default:
+          res.redirect('/documents');
+      } 
+    });
+  });
 });
 
 if (!module.parent) {
