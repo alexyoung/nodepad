@@ -34,3 +34,14 @@ a.button {
 a.button:hover {
   background-color: #efefef;
 }
+h2 a.button {
+  margin-left: 10px;
+}
+form div {
+  padding: 0 0 20px 0;
+}
+textarea {
+  width: 400px;
+  height: 400px;
+  clear: both;
+}

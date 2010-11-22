@@ -1,4 +1,7 @@
 h2 Edit Document
+p
+  a(href='/documents', class='button')
+    &larr; All Documents
 form(method='post', action='/documents/' + d.id)
   input(name='document[id]', value=d.id, type='hidden')
   input(name='_method', value='PUT', type='hidden')
