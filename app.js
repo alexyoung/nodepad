@@ -103,9 +103,9 @@ app.get('/documents/:id.:format?', function(req, res) {
 
 // Update document
 app.put('/documents/:id.:format?', function(req, res) {
-  Document.findById(req.body.document.id, function(d) {
-    d.title = req.body.document.title;
-    d.data = req.body.document.data;
+  Document.findById(req.body.document_id, function(d) {
+    d.title = req.body.title;
+    d.data = req.body.data;
     d.save(function() {
       switch (req.params.format) {
         case 'json':
