@@ -71,7 +71,8 @@ app.get('/documents/new', function(req, res) {
 
 // Create document 
 app.post('/documents.:format?', function(req, res) {
-  var d = new Document(req.body.document);
+  console.log(req.body.document);
+  var d = new Document({title: req.body.title, data: req.body.data});
   d.save(function() {
     switch (req.params.format) {
       case 'json':
