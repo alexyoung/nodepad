@@ -71,7 +71,7 @@ app.get('/documents/new', function(req, res) {
 
 // Create document 
 app.post('/documents.:format?', function(req, res) {
-  var d = new Document(req.body.document);
+  var d = new Document(req.body.d);
   d.save(function() {
     switch (req.params.format) {
       case 'json':
@@ -102,9 +102,9 @@ app.get('/documents/:id.:format?', function(req, res) {
 
 // Update document
 app.put('/documents/:id.:format?', function(req, res) {
-  Document.findById(req.body.document.id, function(d) {
-    d.title = req.body.document.title;
-    d.data = req.body.document.data;
+  Document.findById(req.body.d.id, function(d) {
+    d.title = req.body.d.title;
+    d.data = req.body.d.data;
     d.save(function() {
       switch (req.params.format) {
         case 'json':

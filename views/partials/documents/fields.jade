@@ -1,10 +1,10 @@
 div
   label Title:
-  input(name='document[title]', value=d.title || '')
+  input(name='d[title]', value=d.title || '')
 div
   label Note:
   div
-    textarea(name='document[data]')
+    textarea(name='d[data]')
       =d.data || ''
 div
   input(type='submit', value='Save')

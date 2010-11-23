@@ -20,7 +20,7 @@ module.exports = {
     assert.response(app, {
         url: '/documents.json',
         method: 'POST',
-        data: JSON.stringify({ document: { title: 'Test' } }),
+        data: JSON.stringify({ d: { title: 'Test' } }),
         headers: { 'Content-Type': 'application/json' }
       }, {
         status: 200,
@@ -28,8 +28,8 @@ module.exports = {
       },
 
       function(res) {
-        var document = JSON.parse(res.body);
-        assert.equal('Test', document.title);
+        var d = JSON.parse(res.body);
+        assert.equal('Test', d.title);
       }
     );
   },
@@ -38,7 +38,7 @@ module.exports = {
     assert.response(app, {
         url: '/documents',
         method: 'POST',
-        data: 'document[title]=test',
+        data: 'd[title]=test',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       }, {
         status: 302,
@@ -57,9 +57,9 @@ module.exports = {
         var documents = JSON.parse(res.body);
         assert.type(documents, 'object');
 
-        documents.forEach(function(d) {
-          app.Document.findById(d._id, function(document) {
-            document.remove();
+        documents.forEach(function(data) {
+          app.Document.findById(data._id, function(d) {
+            d.remove();
           });
         });
       });
@@ -68,9 +68,8 @@ module.exports = {
   'GET /': function(beforeExit) {
     assert.response(app,
       { url: '/' },
-      { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' }},
+      { status: 302 },
       function(res) {
-        assert.includes(res.body, '<title>Express</title>');
         process.exit();
       });
   }
