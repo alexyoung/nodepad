@@ -7,15 +7,53 @@ process.env.NODE_ENV = 'test';
 var app = require('../app'),
     assert = require('assert');
 
-function createDocument(title, after) {
-  var d = new app.Document({ title: title });
-  d.save(function() {
-    var lastID = d._id.toHexString();
-    after(lastID);
-  });
-}
-
 module.exports = {
+  'Test registration': function(beforeExit) {
+    assert.response(app, {
+        url: '/users.json',
+        method: 'POST',
+        data: JSON.stringify({ user: { email: 'alex@example.com', password: 'test' } }),
+        headers: { 'Content-Type': 'application/json' }
+      }, {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      },
+
+      function(res) {
+        var user = JSON.parse(res.body);
+        assert.equal('alex@example.com', user.email);
+      }
+    );
+  },
+
+  'Test login': function(beforeExit) {
+    assert.response(app, {
+        url: '/sessions',
+        method: 'POST',
+        data: JSON.stringify({ user: { email: 'alex@example.com', password: 'test' } }),
+        headers: { 'Content-Type': 'application/json' }
+      }, {
+        status: 302,
+        headers: { 'location': '/documents' }
+      }
+    );
+  },
+
+  'Test document index': function(beforeExit) {
+    assert.response(app, {
+        url: '/documents.json',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }, {
+        status: 200,
+      },
+
+      function (res) {
+        console.log(res.body);
+      }
+    );
+  },
+
   'POST /documents.json': function(beforeExit) {
     assert.response(app, {
         url: '/documents.json',

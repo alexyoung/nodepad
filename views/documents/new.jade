@@ -1,7 +1,6 @@
 h2 New Document
 p
-  a(href='/documents', class='button')
-    &larr; All Documents
+  a(href='/documents', class='button') &larr; All Documents
 form(method='post', action='/documents')
   !=partial('documents/fields', { locals: { d: d } })
 

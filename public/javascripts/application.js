@@ -1,7 +1,7 @@
 (function() {
   $('.destroy').live('click', function(e) {
     e.preventDefault();
-    if (confirm('Are you sure you want to delete that item?')) {
+    if (confirm('Are you sure?')) {
       var element = $(this),
           form = $('<form></form>');
       form
