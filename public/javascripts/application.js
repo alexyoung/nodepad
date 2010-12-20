@@ -74,7 +74,7 @@
     $.get(this.href + '.json', function(data) {
       $('#document-list .selected').removeClass('selected');
       li.addClass('selected');
-      $('#editor').html(data.data);
+      $('#editor').val(data.data);
       $('#editor').focus();
     });
 
