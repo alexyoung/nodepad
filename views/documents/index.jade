@@ -1,13 +1,26 @@
-h1 Your Documents
+div(class='outline-view', id='left')
+  div(id='DocumentTitles')
+    ul(id='document-list')
+      - for (var d in documents)
+        li
+          a(id='document-title-' + documents[d].id, href='/documents/' + documents[d].id)
+            =documents[d].title
 
-p
-  a(class='button', href='/documents/new') + New Document
-
-ul
-  - for (var d in documents)
+  ul(class='toolbar')
     li
-      a(class='button', href='/documents/' + documents[d].id + '/edit') Edit
-      a(class='button destroy', href='/documents/' + documents[d].id) Delete
-      a(href='/documents/' + documents[d].id)
-        =documents[d].title
+      a(href='/documents/new')
+        +
+    li
+      a(href='#', id='delete-document')
+        -
 
+div(class='content-divider')
+
+div(class='content')
+  div(id='editor-container')
+    textarea(name='d[data]', id='editor')
+      =d.data || ''
+
+ul(id='controls',class='toolbar')
+  li
+    a(href='#', id='save-button') Save
