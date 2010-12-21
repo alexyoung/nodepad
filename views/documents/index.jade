@@ -19,7 +19,7 @@ div(class='content-divider')
 div(class='content')
   div(id='editor-container')
     textarea(name='d[data]', id='editor')
-      =d.data || ''
+      =d && d.data ? d.data : ''
 
 ul(id='controls',class='toolbar')
   li

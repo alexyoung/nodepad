@@ -8,13 +8,31 @@ Follow the series on "DailyJS":http://dailyjs.com, "@dailyjs":http://twitter.com
 
 h3. Dependencies
 
+You need to install these on your system first:
+
 * "Node":http://nodejs.org/
+* "npm":https://github.com/isaacs/npm/
 * "MongoDB":http://www.mongodb.org/
+
+These are the libraries that the project requires:
+
 * "Mongoose":https://github.com/LearnBoost/mongoose
 * "Express":http://expressjs.com/
 * "Expresso":http://visionmedia.github.com/expresso/
 * "Jade":http://jade-lang.com/
 * "less":https://github.com/cloudhead/less.js
+
+h3. Dependency Installation
+
+Make sure you're running a mongo instance (type <code>mongod</code> if required).
+
+<pre>
+git clone git@github.com:alexyoung/nodepad.git nodepad
+cd nodepad
+npm install .
+
+node app.js
+</pre>
 
 h3. License (GPL)
 
