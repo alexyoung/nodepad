@@ -22,6 +22,16 @@ These are the libraries that the project requires:
 * "Jade":http://jade-lang.com/
 * "less":https://github.com/cloudhead/less.js
 
+This revision of the code has been tested with:
+
+* Node 0.2.4
+* Mongo 1.4.4
+* Mongoose 0.0.4
+* connect-mongodb 0.0.4
+* Express 1.0.0
+* Jade 0.6.0
+* Less 1.0.40
+
 h3. Dependency Installation
 
 Make sure you're running a mongo instance (type <code>mongod</code> if required).
