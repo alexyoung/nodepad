@@ -25,12 +25,14 @@ These are the libraries that the project requires:
 This revision of the code has been tested with:
 
 * Node 0.2.4
-* Mongo 1.4.4
+* Mongo 1.4.4 and 1.6.5
 * Mongoose 0.0.4
 * connect-mongodb 0.0.4
 * Express 1.0.0
 * Jade 0.6.0
 * Less 1.0.40
+
+On Mac OS Snow Leopard and Debian Lenny.
 
 h3. Dependency Installation
 
