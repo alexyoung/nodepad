@@ -1,25 +1,25 @@
-div(class='outline-view', id='left')
-  div(id='DocumentTitles')
-    ul(id='document-list')
+#left.outline-view
+  #DocumentTitles
+    ul#document-list
       - for (var d in documents)
         li
           a(id='document-title-' + documents[d].id, href='/documents/' + documents[d].id)
             =documents[d].title
 
-  ul(class='toolbar')
+  ul.toolbar
     li
       a(href='/documents/new')
         +
     li
-      a(href='#', id='delete-document')
+      a#delete-document(href='#')
         -
 
-div(class='content-divider')
+.content-divider
 
-div(class='content')
-  div(id='editor-container')
-    textarea(name='d[data]', id='editor')
+.content
+  #editor-container
+    textarea#editor(name='d[data]')
 
-ul(id='controls', class='toolbar')
+ul#controls.toolbar
   li
-    a(href='#', id='save-button') Save
+    a#save-button(href='#') Save

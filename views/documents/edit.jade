@@ -1,6 +1,6 @@
 h2 Edit Document
 p
-  a(href='/documents', class='button')
+  a.button(href='/documents')
     &larr; All Documents
 form(method='post', action='/documents/' + d.id)
   input(name='d[id]', value=d.id, type='hidden')

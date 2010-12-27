@@ -1,4 +1,4 @@
-var mongoose = require('mongoose').Mongoose,
+var mongoose = require('mongoose@0.0.4').Mongoose,
     crypto = require('crypto');
 
 mongoose.model('Document', {
