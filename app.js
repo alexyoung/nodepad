@@ -8,6 +8,9 @@ var express = require('express@1.0.0'),
     User,
     Settings = { development: {}, test: {}, production: {} };
 
+app.helpers(require('./helpers.js').helpers);
+app.dynamicHelpers(require('./helpers.js').dynamicHelpers);
+
 // Converts a database connection URI string to
 // the format connect-mongodb expects
 function mongoStoreConnectionArgs() {
@@ -118,6 +121,7 @@ app.get('/documents.:format?', loadUser, function(req, res) {
       break;
 
       default:
+        req.flash('info', 'Document created');
         res.render('documents/index.jade', {
           locals: { documents: documents, currentUser: req.currentUser }
         });
@@ -150,6 +154,7 @@ app.post('/documents.:format?', loadUser, function(req, res) {
       break;
 
       default:
+        req.flash('info', 'Document created');
         res.redirect('/documents');
     }
   });
@@ -187,6 +192,7 @@ app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
         break;
 
         default:
+          req.flash('info', 'Document updated');
           res.redirect('/documents');
       }
     });
@@ -205,6 +211,7 @@ app.del('/documents/:id.:format?', loadUser, function(req, res, next) {
         break;
 
         default:
+          req.flash('info', 'Document deleted');
           res.redirect('/documents');
       } 
     });
@@ -222,6 +229,7 @@ app.post('/users.:format?', function(req, res) {
   var user = new User(req.body.user);
 
   function userSaved() {
+    req.flash('info', 'Your account has been created');
     switch (req.params.format) {
       case 'json':
         res.send(user.__doc);
@@ -234,7 +242,7 @@ app.post('/users.:format?', function(req, res) {
   }
 
   function userSaveFailed() {
-    // TODO: Show error messages
+    req.flash('error', 'Account creation failed');
     res.render('users/new.jade', {
       locals: { user: user }
     });
@@ -256,7 +264,7 @@ app.post('/sessions', function(req, res) {
       req.session.user_id = user.id;
       res.redirect('/documents');
     } else {
-      // TODO: Show error
+      req.flash('error', 'Incorrect credentials');
       res.redirect('/sessions/new');
     }
   }); 
@@ -264,6 +272,7 @@ app.post('/sessions', function(req, res) {
 
 app.del('/sessions', loadUser, function(req, res) {
   if (req.session) {
+    req.flash('info', 'You are now logged out');
     req.session.destroy(function() {});
   }
   res.redirect('/sessions/new');

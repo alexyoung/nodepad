@@ -171,3 +171,26 @@ ul.toolbar a {
 .page p {
   margin: 10px 0;
 }
+.flash {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1001;
+  width: 100%;
+  opacity: 0.75;
+  background-color: #111;
+}
+.flash span {
+  float: left;
+  margin-right: .7em;
+}
+.flash .ui-corner-all {
+  width: 300px;
+  margin: 50px auto 0 auto;
+  padding: 0 5px;
+  opacity: 0.9;
+  font-weight: bold;
+  -moz-box-shadow: 0 0 8px #111;
+  -webkit-box-shadow: 0 0 8px #111;
+  box-shadow: 0 0 8px #111;
+}
