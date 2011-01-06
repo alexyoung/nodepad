@@ -121,7 +121,6 @@ app.get('/documents.:format?', loadUser, function(req, res) {
       break;
 
       default:
-        req.flash('info', 'Document created');
         res.render('documents/index.jade', {
           locals: { documents: documents, currentUser: req.currentUser }
         });
