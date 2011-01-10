@@ -5,5 +5,8 @@
   form(method='post', action='/sessions')
     !=partial('users/fields', { locals: { user: user } })
     div
+      label(for='remember_me') Remember me:
+      input#remember_me(type='checkbox', name='remember_me')
+    div
       input(type='submit', value='Log In')
 

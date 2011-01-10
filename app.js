@@ -1,25 +1,16 @@
 var express = require('express@1.0.0'),
     app = module.exports = express.createServer(),
     mongoose = require('mongoose@0.0.4').Mongoose,
-    mongoStore = require('connect-mongodb@0.0.4'),
+    mongoStore = require('connect-mongodb@0.1.1'),
     sys = require('sys'),
     db,
     Document,
     User,
+    LoginToken,
     Settings = { development: {}, test: {}, production: {} };
 
 app.helpers(require('./helpers.js').helpers);
 app.dynamicHelpers(require('./helpers.js').dynamicHelpers);
-
-// Converts a database connection URI string to
-// the format connect-mongodb expects
-function mongoStoreConnectionArgs() {
-  return { dbname: db.db.databaseName,
-           host: db.db.serverConfig.host,
-           port: db.db.serverConfig.port,
-           username: db.uri.username,
-           password: db.uri.password };
-}
 
 app.configure('development', function() {
   app.set('db-uri', 'mongodb://localhost/nodepad-development');
@@ -41,9 +32,7 @@ app.configure(function() {
   app.use(express.favicon());
   app.use(express.bodyDecoder());
   app.use(express.cookieDecoder());
-  app.use(express.session({
-    store: mongoStore(mongoStoreConnectionArgs())
-  }));
+  app.use(express.session({ store: mongoStore(app.set('db-uri')) }));
   app.use(express.logger({ format: '\x1b[1m:method\x1b[0m \x1b[33m:url\x1b[0m :response-time ms' }))
   app.use(express.methodOverride());
   app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
@@ -52,6 +41,36 @@ app.configure(function() {
 
 app.Document = Document = require('./models.js').Document(db);
 app.User = User = require('./models.js').User(db);
+app.LoginToken = LoginToken = require('./models.js').LoginToken(db);
+
+function authenticateFromLoginToken(req, res, next) {
+  var cookie = JSON.parse(req.cookies.logintoken);
+
+  LoginToken.find({ email: cookie.email,
+                    series: cookie.series,
+                    token: cookie.token })
+            .first(function(token) {
+    if (!token) {
+      res.redirect('/sessions/new');
+      return;
+    }
+
+    User.find({ email: token.email }).first(function(user) {
+      if (user) {
+        req.session.user_id = user.id;
+        req.currentUser = user;
+
+        token.token = token.randomToken();
+        token.save(function() {
+          res.cookie('logintoken', token.cookieValue, { expires: new Date(Date.now() + 2 * 604800000), path: '/' });
+          next();
+        });
+      } else {
+        res.redirect('/sessions/new');
+      }
+    });
+  });
+}
 
 function loadUser(req, res, next) {
   if (req.session.user_id) {
@@ -63,6 +82,8 @@ function loadUser(req, res, next) {
         res.redirect('/sessions/new');
       }
     });
+  } else if (req.cookies.logintoken) {
+    authenticateFromLoginToken(req, res, next);
   } else {
     res.redirect('/sessions/new');
   }
@@ -261,6 +282,15 @@ app.post('/sessions', function(req, res) {
   User.find({ email: req.body.user.email }).first(function(user) {
     if (user && user.authenticate(req.body.user.password)) {
       req.session.user_id = user.id;
+
+      // Remember me
+      if (req.body.remember_me) {
+        var loginToken = new LoginToken({ email: user.email });
+        loginToken.save(function() {
+          res.cookie('logintoken', loginToken.cookieValue, { expires: new Date(Date.now() + 2 * 604800000), path: '/' });
+        });
+      }
+
       res.redirect('/documents');
     } else {
       req.flash('error', 'Incorrect credentials');
@@ -271,7 +301,8 @@ app.post('/sessions', function(req, res) {
 
 app.del('/sessions', loadUser, function(req, res) {
   if (req.session) {
-    req.flash('info', 'You are now logged out');
+    LoginToken.remove({ email: req.currentUser.email }, function() {});
+    res.clearCookie('logintoken');
     req.session.destroy(function() {});
   }
   res.redirect('/sessions/new');
