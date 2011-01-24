@@ -2,6 +2,7 @@ var express = require('express@1.0.0'),
     app = module.exports = express.createServer(),
     mongoose = require('mongoose@0.0.4').Mongoose,
     mongoStore = require('connect-mongodb@0.1.1'),
+    markdown = require('markdown').markdown,
     sys = require('sys'),
     db,
     Document,
@@ -188,6 +189,10 @@ app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
     switch (req.params.format) {
       case 'json':
         res.send(d.__doc);
+      break;
+
+      case 'html':
+        res.send(markdown.toHTML(d.data));
       break;
 
       default:
