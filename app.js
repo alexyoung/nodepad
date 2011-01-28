@@ -167,7 +167,9 @@ app.get('/documents/new', loadUser, function(req, res) {
 
 // Create document 
 app.post('/documents.:format?', loadUser, function(req, res) {
-  var d = new Document(req.body.d);
+  var title = req.body['d[title]'];
+  var data = req.body['d[data]'];
+  var d = new Document({'title':title, 'data':data });
   d.save(function() {
     switch (req.params.format) {
       case 'json':
@@ -205,11 +207,11 @@ app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
 
 // Update document
 app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.body.d.id, function(d) {
+  Document.findById(req.body['d[id]'], function(d) {
     if (!d) return next(new NotFound('Document not found'));
 
-    d.title = req.body.d.title;
-    d.data = req.body.d.data;
+    d.title = req.body['d[title]'];
+    d.data = req.body['d[data]'];
     d.save(function() {
       switch (req.params.format) {
         case 'json':
