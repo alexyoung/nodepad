@@ -306,7 +306,7 @@ app.post('/sessions', function(req, res) {
   }); 
 });
 
-app.del('/sessions', loadUser, function(req, res) {
+app.get('/sessions', loadUser, function(req, res) {
   if (req.session) {
     LoginToken.remove({ email: req.currentUser.email }, function() {});
     res.clearCookie('logintoken');
