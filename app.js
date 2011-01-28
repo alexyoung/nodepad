@@ -286,8 +286,8 @@ app.get('/sessions/new', function(req, res) {
 });
 
 app.post('/sessions', function(req, res) {
-  User.find({ email: req.body.user.email }).first(function(user) {
-    if (user && user.authenticate(req.body.user.password)) {
+  User.find({ email: req.body['user[email]'] }).first(function(user) {
+    if (user && user.authenticate(req.body['user[password]'])) {
       req.session.user_id = user.id;
 
       // Remember me
