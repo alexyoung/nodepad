@@ -3,6 +3,7 @@ var express = require('express@1.0.0'),
     mongoose = require('mongoose@0.0.4').Mongoose,
     mongoStore = require('connect-mongodb@0.1.1'),
     markdown = require('markdown').markdown,
+    connect = require('connect@0.5.1'),
     sys = require('sys'),
     db,
     Document,
@@ -315,5 +316,6 @@ app.del('/sessions', loadUser, function(req, res) {
 
 if (!module.parent) {
   app.listen(3000);
-  console.log("Express server listening on port %d, environment: %s", app.address().port, app.settings.env)
+  console.log('Express server listening on port %d, environment: %s', app.address().port, app.settings.env)
+  console.log('Using connect %s, Express %s', connect.version, express.version);
 }
