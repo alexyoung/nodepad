@@ -251,7 +251,9 @@ app.get('/users/new', function(req, res) {
 });
 
 app.post('/users.:format?', function(req, res) {
-  var user = new User(req.body.user);
+  var password = req.body['user[password]'];
+  var email = req.body['user[email]'];
+  var user = new User({'email':email, 'password':password});
 
   function userSaved() {
     req.flash('info', 'Your account has been created');
