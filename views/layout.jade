@@ -17,6 +17,6 @@ html
           - if (typeof currentUser !== 'undefined')
             li.right
               a.destroy(href='/sessions') Log Out
-      #{flashMessages}
+      !{flashMessages}
       != body
     script(type='text/javascript', src='/javascripts/application.js')
