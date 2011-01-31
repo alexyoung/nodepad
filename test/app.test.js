@@ -6,13 +6,15 @@ var app = require('../app'),
 
 app.listen(3001);
 
-testHelper.setup([app.User], function() {
+testHelper.models = [app.User];
+
+testHelper.setup(function() {
   // Fixtures
   var user = new app.User({'email' : 'alex@example.com', 'password' : 'test' });
   user.save(testHelper.run(exports));
 });
 
-testHelper.tests({
+testHelper.tests = {
   'test login': function() {
     zombie.visit('http://localhost:3001/', function(err, browser, status) {
       // Fill email, password and submit form
@@ -26,5 +28,5 @@ testHelper.tests({
         });
     });
   }
-});
+};
 

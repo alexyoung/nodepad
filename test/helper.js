@@ -1,6 +1,8 @@
 // Force test environment
 process.env.NODE_ENV = 'test';
-var state = {};
+var state = {
+  models: []
+};
 
 function prepare(models, next) {
   var modelCount = models.length;
@@ -17,22 +19,27 @@ function prepare(models, next) {
   });
 };
 
-exports.tests = function(tests) {
-  state.tests = tests;
-};
+module.exports = {
+  run: function(e) {
+    for (var test in state.tests) {
+      e[test] = state.tests[test];
+    }
+  },
 
-exports.run = function(e) {
-  for (var test in state.tests) {
-    e[test] = state.tests[test];
+  setup: function(next) {
+    prepare(state.models, next);
+  },
+
+  end: function() {
+    prepare(state.models, process.exit);
+  },
+
+  set models(models) {
+    state.models = models;
+  },
+
+  set tests(tests) {
+    state.tests = tests;
   }
-};
-
-exports.setup = function(models, next) {
-  state.models = models;
-  prepare(state.models, next);
-};
-
-exports.end = function() {
-  prepare(state.models, process.exit);
 };
 
