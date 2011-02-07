@@ -265,7 +265,6 @@ app.post('/users.:format?', function(req, res) {
   }
 
   user.save(function(err) {
-    console.log(err);
     if (err) return userSaveFailed();
 
     req.flash('info', 'Your account has been created');
