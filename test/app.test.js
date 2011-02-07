@@ -1,3 +1,7 @@
+/**
+  * Run with expresso test/app.test.js
+  */
+
 var app = require('../app'),
     assert = require('assert'),
     zombie = require('zombie'),
@@ -11,7 +15,9 @@ testHelper.models = [app.User];
 testHelper.setup(function() {
   // Fixtures
   var user = new app.User({'email' : 'alex@example.com', 'password' : 'test' });
-  user.save(testHelper.run(exports));
+  user.save(function() {
+    testHelper.run(exports)
+  });
 });
 
 testHelper.tests = {

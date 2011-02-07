@@ -1,115 +1,111 @@
-var mongoose = require('mongoose@0.0.4').Mongoose,
-    crypto = require('crypto');
+var crypto = require('crypto'),
+    Document,
+    User,
+    LoginToken;
 
-mongoose.model('Document', {
-  properties: ['title', 'data', 'tags', 'user_id'],
+function defineModels(mongoose, fn) {
+  var Schema = mongoose.Schema,
+      ObjectId = Schema.ObjectId;
 
-  indexes: [
-    'title',
-    'user_id'
-  ],
+  /**
+    * Model: Document
+    */
+  Document = new Schema({
+    'title': { type: String, index: true },
+    'data': String,
+    'tags': [String],
+    'user_id': ObjectId
+  });
 
-  getters: {
-    id: function() {
+  Document.virtual('id')
+    .get(function() {
       return this._id.toHexString();
-    }
+    });
+
+  /**
+    * Model: User
+    */
+  function validatePresenceOf(value) {
+    return value && value.length;
   }
-});
 
-mongoose.model('User', {
-  properties: ['email', 'hashed_password', 'salt'],
+  User = new Schema({
+    'email': { type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true } },
+    'hashed_password': String,
+    'salt': String
+  });
 
-  indexes: [
-    [{ email: 1 }, { unique: true }]
-  ],
-
-  getters: {
-    id: function() {
+  User.virtual('id')
+    .get(function() {
       return this._id.toHexString();
-    },
+    });
 
-    password: function() { return this._password; }
-  },
-
-  setters: {
-    password: function(password) {
+  User.virtual('password')
+    .set(function(password) {
       this._password = password;
       this.salt = this.makeSalt();
       this.hashed_password = this.encryptPassword(password);
+    })
+    .get(function() { return this._password; });
+
+  User.method('authenticate', function(plainText) {
+    return this.encryptPassword(plainText) === this.hashed_password;
+  });
+  
+  User.method('makeSalt', function() {
+    return Math.round((new Date().valueOf() * Math.random())) + '';
+  });
+
+  User.method('encryptPassword', function(password) {
+    return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
+  });
+
+  User.pre('save', function(next) {
+    if (!validatePresenceOf(this.password)) {
+      next(new Error('Invalid password'));
+    } else {
+      next();
     }
-  },
+  });
 
-  methods: {
-    authenticate: function(plainText) {
-      return this.encryptPassword(plainText) === this.hashed_password;
-    },
+  /**
+    * Model: LoginToken
+    *
+    * Used for session persistence.
+    */
+  LoginToken = new Schema({
+    email: { type: String, index: true },
+    series: { type: String, index: true },
+    token: { type: String, index: true }
+  });
 
-    makeSalt: function() {
-      return Math.round((new Date().valueOf() * Math.random())) + '';
-    },
+  LoginToken.method('randomToken', function() {
+    return Math.round((new Date().valueOf() * Math.random())) + '';
+  });
 
-    encryptPassword: function(password) {
-      return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
-    },
+  LoginToken.pre('save', function(next) {
+    // Automatically create the tokens
+    this.token = this.randomToken();
+    this.series = this.randomToken();
+    next();
+  });
 
-    isValid: function() {
-      // TODO: Better validation
-      return this.email && this.email.length > 0 && this.email.length < 255
-             && this.password && this.password.length > 0 && this.password.length < 255;
-    },
-
-    save: function(okFn, failedFn) {
-      if (this.isValid()) {
-        this.__super__(okFn);
-      } else {
-        failedFn();
-      }
-    }
-  }
-});
-
-mongoose.model('LoginToken', {
-  properties: ['email', 'series', 'token'],
-
-  indexes: [
-    'email',
-    'series',
-    'token'
-  ],
-
-  methods: {
-    randomToken: function() {
-      return Math.round((new Date().valueOf() * Math.random())) + '';
-    },
-
-    save: function(fn) {
-      // Automatically create the tokens
-      this.token = this.randomToken();
-      this.series = this.randomToken();
-      this.__super__(fn);
-    }
-  },
-
-  getters: {
-    id: function() {
+  LoginToken.virtual('id')
+    .get(function() {
       return this._id.toHexString();
-    },
+    });
 
-    cookieValue: function() {
+  LoginToken.virtual('cookieValue')
+    .get(function() {
       return JSON.stringify({ email: this.email, token: this.token, series: this.series });
-    }
-  }
-});
+    });
 
-exports.User = function(db) {
-  return db.model('User');
-};
+  mongoose.model('Document', Document);
+  mongoose.model('User', User);
+  mongoose.model('LoginToken', LoginToken);
 
-exports.Document = function(db) {
-  return db.model('Document');
-};
+  fn();
+}
 
-exports.LoginToken = function(db) {
-  return db.model('LoginToken');
-};
+exports.defineModels = defineModels; 
 

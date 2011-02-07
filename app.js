@@ -2,10 +2,11 @@ var express = require('express@1.0.0'),
     connect = require('connect@0.5.1'),
     jade = require('jade@0.6.0'),
     app = module.exports = express.createServer(),
-    mongoose = require('mongoose@0.0.4').Mongoose,
+    mongoose = require('mongoose@1.0.7'),
     mongoStore = require('connect-mongodb@0.1.1'),
     markdown = require('markdown').markdown,
     sys = require('sys'),
+    models = require('./models'),
     db,
     Document,
     User,
@@ -28,8 +29,6 @@ app.configure('production', function() {
   app.set('db-uri', 'mongodb://localhost/nodepad-production');
 });
 
-db = mongoose.connect(app.set('db-uri'));
-
 app.configure(function() {
   app.set('views', __dirname + '/views');
   app.use(express.favicon());
@@ -42,23 +41,25 @@ app.configure(function() {
   app.use(express.staticProvider(__dirname + '/public'));
 });
 
-app.Document = Document = require('./models.js').Document(db);
-app.User = User = require('./models.js').User(db);
-app.LoginToken = LoginToken = require('./models.js').LoginToken(db);
+models.defineModels(mongoose, function() {
+  app.Document = Document = mongoose.model('Document');
+  app.User = User = mongoose.model('User');
+  app.LoginToken = LoginToken = mongoose.model('LoginToken');
+  db = mongoose.connect(app.set('db-uri'));
+})
 
 function authenticateFromLoginToken(req, res, next) {
   var cookie = JSON.parse(req.cookies.logintoken);
 
-  LoginToken.find({ email: cookie.email,
-                    series: cookie.series,
-                    token: cookie.token })
-            .first(function(token) {
+  LoginToken.findOne({ email: cookie.email,
+                       series: cookie.series,
+                       token: cookie.token }, (function(err, token) {
     if (!token) {
       res.redirect('/sessions/new');
       return;
     }
 
-    User.find({ email: token.email }).first(function(user) {
+    User.findOne({ email: token.email }, function(err, user) {
       if (user) {
         req.session.user_id = user.id;
         req.currentUser = user;
@@ -72,12 +73,12 @@ function authenticateFromLoginToken(req, res, next) {
         res.redirect('/sessions/new');
       }
     });
-  });
+  }));
 }
 
 function loadUser(req, res, next) {
   if (req.session.user_id) {
-    User.findById(req.session.user_id, function(user) {
+    User.findById(req.session.user_id, function(err, user) {
       if (user) {
         req.currentUser = user;
         next();
@@ -136,11 +137,11 @@ app.error(function(err, req, res) {
 
 // Document list
 app.get('/documents.:format?', loadUser, function(req, res) {
-  Document.find().all(function(documents) {
+  Document.find({}, function(err, documents) {
     switch (req.params.format) {
       case 'json':
         res.send(documents.map(function(d) {
-          return d.__doc;
+          return d.toObject();
         }));
       break;
 
@@ -153,7 +154,7 @@ app.get('/documents.:format?', loadUser, function(req, res) {
 });
 
 app.get('/documents/:id.:format?/edit', loadUser, function(req, res, next) {
-  Document.findById(req.params.id, function(d) {
+  Document.findById(req.params.id, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
     res.render('documents/edit.jade', {
       locals: { d: d, currentUser: req.currentUser }
@@ -173,7 +174,7 @@ app.post('/documents.:format?', loadUser, function(req, res) {
   d.save(function() {
     switch (req.params.format) {
       case 'json':
-        res.send(d.__doc);
+        res.send(d.toObject());
       break;
 
       default:
@@ -185,12 +186,12 @@ app.post('/documents.:format?', loadUser, function(req, res) {
 
 // Read document
 app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.params.id, function(d) {
+  Document.findById(req.params.id, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
 
     switch (req.params.format) {
       case 'json':
-        res.send(d.__doc);
+        res.send(d.toObject());
       break;
 
       case 'html':
@@ -207,15 +208,16 @@ app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
 
 // Update document
 app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.body.d.id, function(d) {
+  Document.findById(req.body.d.id, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
 
     d.title = req.body.d.title;
     d.data = req.body.d.data;
-    d.save(function() {
+
+    d.save(function(err) {
       switch (req.params.format) {
         case 'json':
-          res.send(d.__doc);
+          res.send(d.toObject());
         break;
 
         default:
@@ -228,7 +230,7 @@ app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
 
 // Delete document
 app.del('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.params.id, function(d) {
+  Document.findById(req.params.id, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
 
     d.remove(function() {
@@ -255,19 +257,6 @@ app.get('/users/new', function(req, res) {
 app.post('/users.:format?', function(req, res) {
   var user = new User(req.body.user);
 
-  function userSaved() {
-    req.flash('info', 'Your account has been created');
-    switch (req.params.format) {
-      case 'json':
-        res.send(user.__doc);
-      break;
-
-      default:
-        req.session.user_id = user.id;
-        res.redirect('/documents');
-    }
-  }
-
   function userSaveFailed() {
     req.flash('error', 'Account creation failed');
     res.render('users/new.jade', {
@@ -275,7 +264,21 @@ app.post('/users.:format?', function(req, res) {
     });
   }
 
-  user.save(userSaved, userSaveFailed);
+  user.save(function(err) {
+    console.log(err);
+    if (err) return userSaveFailed();
+
+    req.flash('info', 'Your account has been created');
+    switch (req.params.format) {
+      case 'json':
+        res.send(user.toObject());
+      break;
+
+      default:
+        req.session.user_id = user.id;
+        res.redirect('/documents');
+    }
+  });
 });
 
 // Sessions
@@ -286,7 +289,7 @@ app.get('/sessions/new', function(req, res) {
 });
 
 app.post('/sessions', function(req, res) {
-  User.find({ email: req.body.user.email }).first(function(user) {
+  User.findOne({ email: req.body.user.email }, function(err, user) {
     if (user && user.authenticate(req.body.user.password)) {
       req.session.user_id = user.id;
 

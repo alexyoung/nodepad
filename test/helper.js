@@ -8,7 +8,7 @@ function prepare(models, next) {
   var modelCount = models.length;
   models.forEach(function(model) {
     modelCount--;
-    model.find().all(function(records) {
+    model.find({}, function(err, records) {
       var count = records.length;
       records.forEach(function(result) {
         result.remove();
