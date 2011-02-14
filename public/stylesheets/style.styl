@@ -1,0 +1,217 @@
+active-colour = #dfe3ea
+highlight-colour = #c5c5c5
+faded-white = #f0f0f0
+light-grey = #f6f6f6
+medium-grey = #999
+dark-grey = #666
+black = #111
+selected-colour = #8897ba
+
+grey-border()
+  border-top 1px solid highlight-colour
+
+glass-background()
+  background light-grey url('/images/glass.png') repeat-x 50% 50%
+
+light-shadow()
+  text-shadow faded-white 0 1px 0
+
+dark-shadow()
+  text-shadow dark-grey 0 1px 1px
+
+centre-shadow(size, colour)
+  -moz-box-shadow 0 0 size colour
+  -webkit-box-shadow 0 0 size colour
+  box-shadow 0 0 size colour
+
+body
+  padding 0
+  margin 0
+  font 14px "Lucida Grande", "Helvetica Nueue", Arial, sans-serif
+
+h1, h2, h3, h4, h5, h6, p, ul, li, div, form
+  margin 0
+  padding 0
+
+#header
+  width 100%
+  height 35px
+  list-style-type none
+  margin 0
+  padding 0
+  background light-grey url('/images/gradient.gif') repeat-x 50% 50%
+  border-bottom 1px solid medium-grey
+
+#header ul
+  list-style-type none
+  padding 8px
+
+#header h1 a
+  font-size 18px
+
+#header ul li
+  float left
+
+#header ul li.right
+  float right
+
+#header a
+  font-size 13px
+  font-weight bold
+  text-decoration none
+  color #333
+  light-shadow()
+
+.outline-view
+  position absolute
+  width 250px
+  background-color active-colour
+
+#DocumentTitles
+  overflow auto
+
+.outline-view ul li
+  margin 0
+  padding 0
+
+.outline-view ul a
+  font-size 13px
+  color #000
+  text-decoration none
+  display block
+  padding 7px 10px
+
+.outline-view ul li.selected a
+  color #fff
+  font-weight bold
+  dark-shadow()
+
+.outline-view ul .selected
+  font-weight bold
+  color #fff
+  background-color selected-colour
+  background -webkit-gradient(linear, left top, left bottom, from(#b2bed7), to(selected-colour))
+  background -moz-linear-gradient(top,  #b2bed7,  selected-colour)
+
+.outline-view ahover
+  background-color faded-white !important
+
+.outline-view a
+  outline none
+
+.content-divider
+  position absolute
+  left 250px
+  background-color medium-grey
+  width 2px
+  margin 0
+  padding 0
+  cursor e-resize
+  cursor col-resize
+
+.content
+  position absolute
+  left 251px
+  margin 0
+  padding 0
+  overflow auto
+  overflow-x hidden
+
+ul.toolbar
+  list-style-type none
+  margin 0
+  padding 0
+  glass-background()
+  height 30px
+  grey-border()
+  position absolute
+  left 0
+  bottom 0
+
+ul.toolbar li
+  float left
+  border-right 1px solid highlight-colour
+
+ul.toolbar li.right
+  float right
+  border-left 1px solid highlight-colour
+
+ul.toolbar a
+  display block
+  padding 6px 10px
+  font-size 14px
+  border 1px solid #F5F4F5
+  color dark-grey
+  font-weight bold !important
+  width 14px
+  text-align center
+  font-size 15px
+  line-height 16px
+
+ul.toolbar a
+  text-shadow #fff 0 1px 0
+  text-decoration none
+
+#editor-container
+  float right
+  width 100%
+
+#editor
+  border none
+  outline none
+  font-size 108%
+  float right
+
+#controls
+  position absolute
+  left 252px
+  bottom 0
+  height 30px
+  grey-border()
+  glass-background()
+
+#controls a
+  font-size 13px
+  width 44px
+
+#html-container
+  padding 10px
+  border-bottom 2px solid highlight-colour
+  background-color light-grey
+  margin-bottom 10px
+
+#html-container p
+  margin 10px 0
+
+#html-button.active
+  background-color active-colour
+
+.page
+  padding 10px
+
+.page h2
+  margin-bottom 10px
+
+.page p
+  margin 10px 0
+
+.flash
+  position absolute
+  top 0
+  bottom 0
+  z-index 1001
+  width 100%
+  opacity 0.75
+  background-color black
+
+.flash span
+  float left
+  margin-right .7em
+
+.flash .ui-corner-all
+  width 300px
+  margin 50px auto 0 auto
+  padding 0 5px
+  opacity 0.9
+  font-weight bold
+  centre-shadow(8px, light-grey)

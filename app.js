@@ -1,9 +1,10 @@
-var express = require('express@1.0.0'),
+var express = require('express@1.0.7'),
     connect = require('connect@0.5.1'),
     jade = require('jade@0.6.0'),
     app = module.exports = express.createServer(),
     mongoose = require('mongoose@1.0.7'),
     mongoStore = require('connect-mongodb@0.1.1'),
+    stylus = require('stylus'),
     markdown = require('markdown').markdown,
     sys = require('sys'),
     models = require('./models'),
@@ -37,7 +38,7 @@ app.configure(function() {
   app.use(express.session({ store: mongoStore(app.set('db-uri')), secret: 'topsecret' }));
   app.use(express.logger({ format: '\x1b[1m:method\x1b[0m \x1b[33m:url\x1b[0m :response-time ms' }))
   app.use(express.methodOverride());
-  app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
+  app.use(stylus.middleware({ src: __dirname + '/public' }));
   app.use(express.staticProvider(__dirname + '/public'));
 });
 
@@ -126,6 +127,7 @@ app.error(function(err, req, res, next) {
   }
 });
 
+/*
 app.error(function(err, req, res) {
   res.render('500.jade', {
     status: 500,
@@ -134,6 +136,7 @@ app.error(function(err, req, res) {
     } 
   });
 });
+*/
 
 // Document list
 app.get('/documents.:format?', loadUser, function(req, res) {

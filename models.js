@@ -86,7 +86,10 @@ function defineModels(mongoose, fn) {
   LoginToken.pre('save', function(next) {
     // Automatically create the tokens
     this.token = this.randomToken();
-    this.series = this.randomToken();
+
+    if (this.isNew)
+      this.series = this.randomToken();
+
     next();
   });
 

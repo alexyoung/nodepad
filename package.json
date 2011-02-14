@@ -10,7 +10,7 @@
     "node": ">= 0.2.0"
   },
   "dependencies": {
-    "express": "1.0.0",
+    "express": "1.0.7",
     "mongoose": "1.0.7",
     "connect": "0.5.1",
     "connect-mongodb": "0.1.1",

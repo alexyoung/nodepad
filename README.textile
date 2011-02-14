@@ -49,6 +49,7 @@ node app.js
 h3. Contributions
 
 * "luebken":https://github.com/luebken
+* "eirikurn":https://github.com/eirikurn
 
 h3. License (GPL)
 
