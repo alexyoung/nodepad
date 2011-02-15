@@ -31,6 +31,7 @@ This revision of the code has been tested with:
 * Express 1.0.0
 * Jade 0.6.0
 * Less 1.0.40
+* Stylus 0.5.1
 
 On Mac OS Snow Leopard and Debian Lenny.
 
@@ -50,6 +51,7 @@ h3. Contributions
 
 * "luebken":https://github.com/luebken
 * "eirikurn":https://github.com/eirikurn
+* "@francoislaberge":http://twitter.com/francoislaberge
 
 h3. License (GPL)
 
