@@ -32,6 +32,7 @@ This revision of the code has been tested with:
 * Jade 0.6.0
 * Less 1.0.40
 * Stylus 0.5.1
+* node_mailer 0.4.52
 
 On Mac OS Snow Leopard and Debian Lenny.
 
