@@ -4,22 +4,61 @@ var express = require('express@1.0.7'),
     app = module.exports = express.createServer(),
     mongoose = require('mongoose@1.0.7'),
     mongoStore = require('connect-mongodb@0.1.1'),
+    mailer = require('mailer@0.4.52'),
     stylus = require('stylus'),
     markdown = require('markdown').markdown,
     sys = require('sys'),
+    path = require('path'),
     models = require('./models'),
     db,
     Document,
     User,
     LoginToken,
-    Settings = { development: {}, test: {}, production: {} };
+    Settings = { development: {}, test: {}, production: {} },
+    emails;
+
+emails = {
+  send: function(template, mailOptions, templateOptions) {
+    mailOptions.to = mailOptions.to;
+    jade.renderFile(path.join(__dirname, 'views', 'mailer', template), templateOptions, function(err, text) {
+      // Add the rendered Jade template to the mailOptions
+      mailOptions.body = text;
+
+      // Merge the app's mail options
+      var keys = Object.keys(app.set('mailOptions')),
+          k;
+      for (var i = 0, len = keys.length; i < len; i++) {
+        k = keys[i];
+        if (!mailOptions.hasOwnProperty(k))
+          mailOptions[k] = app.set('mailOptions')[k]
+      }
+
+      console.log('[SENDING MAIL]', sys.inspect(mailOptions));
+
+      // Only send mails in production
+      if (app.settings.env == 'production') {
+        mailer.send(mailOptions,
+          function(err, result) {
+            if (err) {
+              console.log(err);
+            }
+          }
+        );
+      }
+    });
+  },
+
+  sendWelcome: function(user) {
+    this.send('welcome.jade', { to: user.email, subject: 'Welcome to Nodepad' }, { locals: { user: user } });
+  }
+};
 
 app.helpers(require('./helpers.js').helpers);
 app.dynamicHelpers(require('./helpers.js').dynamicHelpers);
 
 app.configure('development', function() {
   app.set('db-uri', 'mongodb://localhost/nodepad-development');
-  app.use(express.errorHandler({ dumpExceptions: true }));  
+  app.use(express.errorHandler({ dumpExceptions: true }));
 });
 
 app.configure('test', function() {
@@ -40,6 +79,11 @@ app.configure(function() {
   app.use(express.methodOverride());
   app.use(stylus.middleware({ src: __dirname + '/public' }));
   app.use(express.staticProvider(__dirname + '/public'));
+  app.set('mailOptions', {
+    host:    'localhost',
+    port:    '25',
+    from:    'nodepad@example.com',
+  });
 });
 
 models.defineModels(mongoose, function() {
@@ -127,20 +171,20 @@ app.error(function(err, req, res, next) {
   }
 });
 
-/*
-app.error(function(err, req, res) {
-  res.render('500.jade', {
-    status: 500,
-    locals: {
-      error: err
-    } 
+if (app.settings.env == 'production') {
+  app.error(function(err, req, res) {
+    res.render('500.jade', {
+      status: 500,
+      locals: {
+        error: err
+      } 
+    });
   });
-});
-*/
+}
 
 // Document list
 app.get('/documents.:format?', loadUser, function(req, res) {
-  Document.find({}, function(err, documents) {
+  Document.find({ user_id: req.currentUser.id }, function(err, documents) {
     switch (req.params.format) {
       case 'json':
         res.send(documents.map(function(d) {
@@ -157,7 +201,7 @@ app.get('/documents.:format?', loadUser, function(req, res) {
 });
 
 app.get('/documents/:id.:format?/edit', loadUser, function(req, res, next) {
-  Document.findById(req.params.id, function(err, d) {
+  Document.findOne({ _id: req.params.id, user_id: req.currentUser.id }, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
     res.render('documents/edit.jade', {
       locals: { d: d, currentUser: req.currentUser }
@@ -174,6 +218,7 @@ app.get('/documents/new', loadUser, function(req, res) {
 // Create document 
 app.post('/documents.:format?', loadUser, function(req, res) {
   var d = new Document(req.body.d);
+  d.user_id = req.currentUser.id;
   d.save(function() {
     switch (req.params.format) {
       case 'json':
@@ -189,7 +234,7 @@ app.post('/documents.:format?', loadUser, function(req, res) {
 
 // Read document
 app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.params.id, function(err, d) {
+  Document.findOne({ _id: req.params.id, user_id: req.currentUser.id }, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
 
     switch (req.params.format) {
@@ -211,7 +256,7 @@ app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
 
 // Update document
 app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.body.d.id, function(err, d) {
+  Document.findOne({ _id: req.params.id, user_id: req.currentUser.id }, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
 
     d.title = req.body.d.title;
@@ -233,7 +278,7 @@ app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
 
 // Delete document
 app.del('/documents/:id.:format?', loadUser, function(req, res, next) {
-  Document.findById(req.params.id, function(err, d) {
+  Document.findOne({ _id: req.params.id, user_id: req.currentUser.id }, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
 
     d.remove(function() {
@@ -271,6 +316,8 @@ app.post('/users.:format?', function(req, res) {
     if (err) return userSaveFailed();
 
     req.flash('info', 'Your account has been created');
+    emails.sendWelcome(user);
+
     switch (req.params.format) {
       case 'json':
         res.send(user.toObject());
