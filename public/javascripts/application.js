@@ -32,6 +32,7 @@
           'value': 'delete'
         })
         .end()
+        .appendTo('body')
         .submit();
     }
   });
@@ -54,6 +55,7 @@
           'value': 'delete'
         })
         .end()
+        .appendTo('body')
         .submit();
     }
   });
