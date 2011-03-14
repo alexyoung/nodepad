@@ -1,11 +1,11 @@
-var express = require('express@1.0.7'),
-    connect = require('connect@0.5.1'),
-    jade = require('jade@0.6.0'),
+var express = require('express@2.0.0beta3'),
+    connect = require('connect@1.0.6'),
+    jade = require('jade@0.8.6'),
     app = module.exports = express.createServer(),
-    mongoose = require('mongoose@1.0.7'),
-    mongoStore = require('connect-mongodb@0.1.1'),
+    mongoose = require('mongoose@1.1.4'),
+    mongoStore = require('connect-mongodb@0.2.1'),
     mailer = require('mailer@0.4.52'),
-    stylus = require('stylus'),
+    stylus = require('stylus@0.7.4'),
     markdown = require('markdown').markdown,
     sys = require('sys'),
     path = require('path'),
@@ -72,13 +72,13 @@ app.configure('production', function() {
 app.configure(function() {
   app.set('views', __dirname + '/views');
   app.use(express.favicon());
-  app.use(express.bodyDecoder());
-  app.use(express.cookieDecoder());
+  app.use(express.bodyParser());
+  app.use(express.cookieParser());
   app.use(express.session({ store: mongoStore(app.set('db-uri')), secret: 'topsecret' }));
   app.use(express.logger({ format: '\x1b[1m:method\x1b[0m \x1b[33m:url\x1b[0m :response-time ms' }))
   app.use(express.methodOverride());
   app.use(stylus.middleware({ src: __dirname + '/public' }));
-  app.use(express.staticProvider(__dirname + '/public'));
+  app.use(express.static(__dirname + '/public'));
   app.set('mailOptions', {
     host:    'localhost',
     port:    '25',
@@ -347,10 +347,11 @@ app.post('/sessions', function(req, res) {
         var loginToken = new LoginToken({ email: user.email });
         loginToken.save(function() {
           res.cookie('logintoken', loginToken.cookieValue, { expires: new Date(Date.now() + 2 * 604800000), path: '/' });
+          res.redirect('/documents');
         });
+      } else {
+        res.redirect('/documents');
       }
-
-      res.redirect('/documents');
     } else {
       req.flash('error', 'Incorrect credentials');
       res.redirect('/sessions/new');

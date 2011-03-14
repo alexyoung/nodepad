@@ -8,16 +8,16 @@
     "public": "./public"
   },
   "engines": {
-    "node": ">= 0.2.0"
+    "node": ">= 0.4.0"
   },
   "dependencies": {
-    "express": "1.0.7",
-    "mongoose": "1.0.7",
-    "connect": "0.5.1",
-    "connect-mongodb": "0.1.1",
-    "jade": "0.6.0",
+    "express": "2.0.0beta3",
+    "mongoose": "1.1.4",
+    "connect": "1.0.6",
+    "connect-mongodb": "0.2.1",
+    "jade": "0.8.6",
     "markdown": "0.2.0",
-    "stylus": "0.5.1",
+    "stylus": "0.7.4",
     "mailer": "0.4.52"
   },
   "bin": {
