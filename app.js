@@ -184,7 +184,9 @@ if (app.settings.env == 'production') {
 
 // Document list
 app.get('/documents.:format?', loadUser, function(req, res) {
-  Document.find({ user_id: req.currentUser.id }, function(err, documents) {
+  Document.find({ user_id: req.currentUser.id },
+                [], { sort: ['title', 'descending'] },
+                function(err, documents) {
     switch (req.params.format) {
       case 'json':
         res.send(documents.map(function(d) {
@@ -197,6 +199,16 @@ app.get('/documents.:format?', loadUser, function(req, res) {
           locals: { documents: documents, currentUser: req.currentUser }
         });
     }
+  });
+});
+
+app.get('/documents/titles.json', loadUser, function(req, res) {
+  Document.find({ user_id: req.currentUser.id },
+                [], { sort: ['title', 'descending'] },
+                function(err, documents) {
+    res.send(documents.map(function(d) {
+      return { title: d.title, id: d.id };
+    }));
   });
 });
 

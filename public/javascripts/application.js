@@ -83,8 +83,8 @@
     divider.css({ height: height + 'px' });
 
     ed.css({
-      width: content.width() - 20 + 'px',
-      height: content.height() - 5 + 'px'
+      width: content.width() + 'px',
+      height: content.height() - 22 - $('input.title').height() + 'px'
     }).focus();
 
     $('#controls').css({
@@ -99,6 +99,7 @@
       $('#document-list .selected').removeClass('selected');
       li.addClass('selected');
       $('#editor').val(data.data);
+      $('.title').val(data.title);
       $('#editor').focus();
     });
 
@@ -111,10 +112,19 @@
 
   $('#save-button').click(function() {
     var id = $('#document-list .selected').itemID(),
-        params = { d: { data: $('#editor').val(), id: id, title: $('#document-list .selected').html() } };
+        params = { d: { data: $('#editor').val(), id: id, title: $('input.title').val() } };
     $.put('/documents/' + id + '.json', params, function(data) {
       // Saved, will return JSON
+      $('#document-title-' + id).html(data.title);
     });
+  });
+
+  $('#create-document').click(function(e) {
+    $.post('/documents.json', { d: { data: '', title: 'Untitled Document' } }, function(new_doc) {
+      $('#document-list').append('<li><a id="document-title-' + new_doc._id + '" href="/documents/' + new_doc._id + '">' + new_doc.title + '</a></li>');
+      $('#document-title-' + new_doc._id).click();
+    });
+    e.preventDefault();
   });
 
   $('#html-button').click(function() {

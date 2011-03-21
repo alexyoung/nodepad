@@ -17,6 +17,10 @@ form {
   margin: 0;
   padding: 0;
 }
+a {
+  outline: none;
+  -moz-outline-style: none;
+}
 #header {
   width: 100%;
   height: 35px;
@@ -136,15 +140,33 @@ ul.toolbar a {
   text-shadow: #fff 0 1px 0;
   text-decoration: none;
 }
+ul.toolbar a:active {
+  background-color: #666;
+  color: #fff;
+}
 #editor-container {
   float: right;
   width: 100%;
 }
-#editor {
+#editor,
+#editor-container input.title {
   border: none;
   outline: none;
   font-size: 108%;
   float: right;
+  clear: both;
+  border-bottom: 1px solid #999;
+  margin: 0;
+  width: 100%;
+  padding: 5px 0;
+}
+#editor-container input:focus {
+  background-color: #ffc;
+}
+#editor-container input.title {
+  float: left;
+  padding-left: 4px;
+  margin-left: 1px;
 }
 #controls {
   position: absolute;
@@ -201,4 +223,26 @@ ul.toolbar a {
   -moz-box-shadow: 0 0 8px #f6f6f6;
   -webkit-box-shadow: 0 0 8px #f6f6f6;
   box-shadow: 0 0 8px #f6f6f6;
+}
+form.users {
+  background-color: #f0f0f0;
+  border: 1px solid #999;
+  float: left;
+  padding: 0 10px 10px 10px;
+}
+form.users div {
+  padding: 10px 0 0 0;
+  float: left;
+  clear: left;
+}
+form.users label {
+  width: 140px;
+  float: left;
+  clear: right;
+  color: #666;
+  font-weight: bold;
+}
+form.users input[type=submit] {
+  margin-left: 140px;
+  clear: both;
 }

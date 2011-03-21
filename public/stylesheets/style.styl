@@ -6,6 +6,7 @@ medium-grey = #999
 dark-grey = #666
 black = #111
 selected-colour = #8897ba
+light-selection-colour = #ffc
 
 grey-border()
   border-top 1px solid highlight-colour
@@ -32,6 +33,10 @@ body
 h1, h2, h3, h4, h5, h6, p, ul, li, div, form
   margin 0
   padding 0
+
+a
+  outline none
+  -moz-outline-style none
 
 #header
   width 100%
@@ -152,15 +157,32 @@ ul.toolbar a
   text-shadow #fff 0 1px 0
   text-decoration none
 
+ul.toolbar a:active
+  background-color dark-grey
+  color white
+
 #editor-container
   float right
   width 100%
 
-#editor
+#editor, #editor-container input.title
   border none
   outline none
   font-size 108%
   float right
+  clear both
+  border-bottom 1px solid medium-grey
+  margin 0
+  width 100%
+  padding 5px 0
+
+#editor-container input:focus
+  background-color light-selection-colour 
+
+#editor-container input.title
+  float left
+  padding-left 4px
+  margin-left 1px
 
 #controls
   position absolute
@@ -215,3 +237,26 @@ ul.toolbar a
   opacity 0.9
   font-weight bold
   centre-shadow(8px, light-grey)
+
+form.users
+  background-color faded-white
+  border 1px solid medium-grey
+  float left
+  padding 0 10px 10px 10px
+
+form.users div
+  padding 10px 0 0 0
+  float left
+  clear left
+
+form.users label
+  width 140px
+  float left
+  clear right
+  color dark-grey
+  font-weight bold
+
+form.users input[type=submit]
+  margin-left 140px
+  clear both
+

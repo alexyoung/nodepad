@@ -8,7 +8,7 @@
 
   ul.toolbar
     li
-      a(href='/documents/new')
+      a#create-document(href='/documents/new')
         +
     li
       a#delete-document(href='#')
@@ -19,6 +19,8 @@
 .content
   #html-container(style='display: none')
   #editor-container
+    div.title
+      input.title(name='d[title]')= d.title
     textarea#editor(name='d[data]')
 
 ul#controls.toolbar
