@@ -207,7 +207,7 @@ app.get('/documents/titles.json', loadUser, function(req, res) {
                 [], { sort: ['title', 'descending'] },
                 function(err, documents) {
     res.send(documents.map(function(d) {
-      return { title: d.title, id: d.id };
+      return { title: d.title, _id: d._id };
     }));
   });
 });
@@ -378,6 +378,21 @@ app.del('/sessions', loadUser, function(req, res) {
     req.session.destroy(function() {});
   }
   res.redirect('/sessions/new');
+});
+
+// Search
+app.post('/search.:format?', loadUser, function(req, res) {
+  Document.find({ user_id: req.currentUser.id, keywords: req.body.s ? req.body.s : null },
+                [], { sort: ['title', 'descending'] },
+                function(err, documents) {
+    switch (req.params.format) {
+      case 'json':
+        res.send(documents.map(function(d) {
+          return { title: d.title, _id: d._id };
+        }));
+      break;
+    }
+  });
 });
 
 if (!module.parent) {

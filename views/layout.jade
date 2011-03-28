@@ -17,6 +17,9 @@ html
           - if (typeof currentUser !== 'undefined')
             li.right
               a#logout(href='/sessions') Log Out
+            li.right
+              form.search(action='/search')
+                input(name='s', value='Search')
       !{flashMessages}
       != body
     script(type='text/javascript', src='/javascripts/application.js')

@@ -121,7 +121,7 @@
 
   $('#create-document').click(function(e) {
     $.post('/documents.json', { d: { data: '', title: 'Untitled Document' } }, function(new_doc) {
-      $('#document-list').append('<li><a id="document-title-' + new_doc._id + '" href="/documents/' + new_doc._id + '">' + new_doc.title + '</a></li>');
+      showDocuments([new_doc]);
       $('#document-title-' + new_doc._id).click();
     });
     e.preventDefault();
@@ -151,6 +151,53 @@
     $('.flash').each(hideFlashMessages);
   }, 5000);
   $('.flash').click(hideFlashMessages);
+
+  // Search bar
+  function showDocuments(results) {
+    for (var i = 0; i < results.length; i++) {
+      $('#document-list').append('<li><a id="document-title-' + results[i]._id + '" href="/documents/' + results[i]._id + '">' + results[i].title + '</a></li>');
+    }
+  }
+
+  function search(value) {
+    $.post('/search.json', { s: value }, function(results) {
+      $('#document-list').html('');
+      $('#document-list').append('<li><a id="show-all" href="#">Show All</a></li>');
+
+      if (results.length === 0) {
+        alert('No results found');
+      } else {
+        showDocuments(results);
+      }
+    }, 'json');
+  }
+
+  $('input[name="s"]').focus(function() {
+    var element = $(this);
+    if (element.val() === 'Search')
+      element.val('');
+  });
+
+  $('input[name="s"]').blur(function() {
+    var element = $(this);
+    if (element.val().length === 0)
+      element.val('Search');
+  });
+
+  $('form.search').submit(function(e) {
+    search($('input[name="s"]').val());
+    e.preventDefault();
+  });
+
+  $('#show-all').live('click', function(e) {
+    $.get('/documents/titles.json', function(results) {
+      $('#document-list').html('');
+      showDocuments(results);
+      if (results.length > 0)
+        $('#document-title-' + results[0]._id).click();
+    });
+    e.preventDefault();
+  });
 
   $(window).resize(resize);
   $(window).focus(resize);
