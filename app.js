@@ -183,6 +183,19 @@ if (app.settings.env == 'production') {
 }
 
 // Document list
+app.get('/documents', loadUser, function(req, res) {
+  Document.find({ user_id: req.currentUser.id },
+                [], { sort: ['title', 'descending'] },
+                function(err, documents) {
+    documents = documents.map(function(d) {
+      return { title: d.title, _id: d._id };
+    });
+    res.render('documents/index.jade', {
+      locals: { documents: documents, currentUser: req.currentUser }
+    });
+  });
+});
+
 app.get('/documents.:format?', loadUser, function(req, res) {
   Document.find({ user_id: req.currentUser.id },
                 [], { sort: ['title', 'descending'] },
@@ -195,9 +208,7 @@ app.get('/documents.:format?', loadUser, function(req, res) {
       break;
 
       default:
-        res.render('documents/index.jade', {
-          locals: { documents: documents, currentUser: req.currentUser }
-        });
+        res.send('Format not available', 400);
     }
   });
 });

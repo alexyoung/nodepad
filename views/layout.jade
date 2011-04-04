@@ -7,6 +7,8 @@ html
     script(type='text/javascript', src='/javascripts/json.js')
     script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js')
     script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/jquery-ui.min.js')
+    script(type='text/javascript', src='/javascripts/underscore-min.js')
+    script(type='text/javascript', src='/javascripts/backbone-min.js')
   body
     #container
       #header
@@ -23,3 +25,6 @@ html
       !{flashMessages}
       != body
     script(type='text/javascript', src='/javascripts/application.js')
+    script(type='text/javascript')
+      Documents.refresh(!{JSON.stringify(documents)});
+    

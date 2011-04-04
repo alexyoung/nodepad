@@ -1,5 +1,95 @@
 (function() {
+  var Document, Documents, DocumentRow, DocumentList, DocumentView;
+
+  _.templateSettings = {
+    interpolate : /\{\{(.+?)\}\}/g
+  };
+
+  Document = Backbone.Model.extend({
+    Collection: Documents,
+
+    url: function() {
+      return '/documents/' + this.get('_id') + '.json';
+    },
+
+    display: function() {
+      this.fetch({
+        success: function(model, response) {
+          $('#editor-container input.title').val(model.get('title'));
+          $('#editor').val(model.get('data'));
+        }
+      });
+    }
+  });
+
+  Documents = new Backbone.Collection();
+  Documents.url = '/documents/titles.json';
+  Documents.model = Document;
+  Documents.comparator = function(d) {
+    return d.get('title');
+  };
+
+  DocumentView = Backbone.View.extend({
+    events: {
+    },
+
+    initialize: function() {
+    },
+  });
+
+  DocumentRow = Backbone.View.extend({
+    tagName: 'li',
+
+    events: {
+      'click a': 'open'
+    },
+
+    template: _.template($('#document-row-template').html()),
+
+    initialize: function() {
+      _.bindAll(this, 'render');
+    },
+
+    open: function() {
+      $('#document-list .selected').removeClass('selected');
+      $(this.el).addClass('selected');
+      this.model.display();
+    },
+
+    render: function() {
+      $(this.el).html(this.template({
+        id: this.model.id,
+        title: this.model.get('title')
+      }));
+      return this;
+    }
+  });
+
+  DocumentList = Backbone.View.extend({
+    el: $('#document-list'),
+    Collection: Documents,
+
+    initialize: function() {
+      _.bindAll(this, 'render');
+      this.Collection.bind('refresh', this.render);
+    },
+
+    render: function(documents) {
+      var element = this.el;
+      documents.each(function(d) {
+        d.rowView = new DocumentRow({ model: d });
+        element.append(d.rowView.render().el);
+      });
+    }
+  });
+
+  new DocumentList();
+  window.Documents = Documents;
+
+  //Documents.fetch();
+
   // Easily get an item's database ID based on an id attribute
+  /*
   $.fn.itemID = function() {
     try {
       var items = $(this).attr('id').split('-');
@@ -60,6 +150,8 @@
     }
   });
 
+  */
+
   // Correct widths and heights based on window size
   function resize() {
     var height = $(window).height() - $('#header').height() - 1,
@@ -92,6 +184,7 @@
     });
   }
 
+  /*
   $('#document-list li a').live('click', function(e) {
     var li = $(this);
 
@@ -142,6 +235,7 @@
       });
     }
   });
+  */
 
   function hideFlashMessages() {
     $(this).fadeOut();
