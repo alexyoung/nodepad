@@ -188,7 +188,7 @@ app.get('/documents', loadUser, function(req, res) {
                 [], { sort: ['title', 'descending'] },
                 function(err, documents) {
     documents = documents.map(function(d) {
-      return { title: d.title, _id: d._id };
+      return { title: d.title, id: d._id };
     });
     res.render('documents/index.jade', {
       locals: { documents: documents, currentUser: req.currentUser }
@@ -218,7 +218,7 @@ app.get('/documents/titles.json', loadUser, function(req, res) {
                 [], { sort: ['title', 'descending'] },
                 function(err, documents) {
     res.send(documents.map(function(d) {
-      return { title: d.title, _id: d._id };
+      return { title: d.title, id: d._id };
     }));
   });
 });
@@ -240,12 +240,15 @@ app.get('/documents/new', loadUser, function(req, res) {
 
 // Create document 
 app.post('/documents.:format?', loadUser, function(req, res) {
-  var d = new Document(req.body.d);
+  var d = new Document(req.body);
   d.user_id = req.currentUser.id;
   d.save(function() {
     switch (req.params.format) {
       case 'json':
-        res.send(d.toObject());
+        var data = d.toObject();
+        // TODO: Backbone requires 'id', but can I alias it?
+        data.id = data._id;
+        res.send(data);
       break;
 
       default:
@@ -281,9 +284,8 @@ app.get('/documents/:id.:format?', loadUser, function(req, res, next) {
 app.put('/documents/:id.:format?', loadUser, function(req, res, next) {
   Document.findOne({ _id: req.params.id, user_id: req.currentUser.id }, function(err, d) {
     if (!d) return next(new NotFound('Document not found'));
-
-    d.title = req.body.d.title;
-    d.data = req.body.d.data;
+    d.title = req.body.title;
+    d.data = req.body.data;
 
     d.save(function(err) {
       switch (req.params.format) {
@@ -399,7 +401,7 @@ app.post('/search.:format?', loadUser, function(req, res) {
     switch (req.params.format) {
       case 'json':
         res.send(documents.map(function(d) {
-          return { title: d.title, _id: d._id };
+          return { title: d.title, id: d._id };
         }));
       break;
     }

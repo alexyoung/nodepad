@@ -25,6 +25,7 @@ html
       !{flashMessages}
       != body
     script(type='text/javascript', src='/javascripts/application.js')
-    script(type='text/javascript')
-      Documents.refresh(!{JSON.stringify(documents)});
+    - if (typeof documents !== 'undefined')
+      script(type='text/javascript')
+        Documents.refresh(!{JSON.stringify(documents)});
     

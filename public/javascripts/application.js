@@ -1,15 +1,15 @@
 (function() {
-  var Document, Documents, DocumentRow, DocumentList, DocumentView;
+  var Document, Documents, DocumentRow, DocumentList, DocumentControls, ListToolBar, AppView;
 
   _.templateSettings = {
-    interpolate : /\{\{(.+?)\}\}/g
+    interpolate: /\{\{(.+?)\}\}/g
   };
 
   Document = Backbone.Model.extend({
     Collection: Documents,
 
     url: function() {
-      return '/documents/' + this.get('_id') + '.json';
+      return this.get('id') ? '/documents/' + this.get('id') + '.json' : '/documents.json';
     },
 
     display: function() {
@@ -29,14 +29,6 @@
     return d.get('title');
   };
 
-  DocumentView = Backbone.View.extend({
-    events: {
-    },
-
-    initialize: function() {
-    },
-  });
-
   DocumentRow = Backbone.View.extend({
     tagName: 'li',
 
@@ -54,6 +46,12 @@
       $('#document-list .selected').removeClass('selected');
       $(this.el).addClass('selected');
       this.model.display();
+      this.controls = new DocumentControls(this.model),
+      this.toolbar = new ListToolBar(this.model);
+    },
+
+    remove: function() {
+      $(this.el).remove();
     },
 
     render: function() {
@@ -70,62 +68,94 @@
     Collection: Documents,
 
     initialize: function() {
-      _.bindAll(this, 'render');
+      _.bindAll(this, 'render', 'addDocument');
       this.Collection.bind('refresh', this.render);
     },
 
+    addDocument: function(d) {
+      d.rowView = new DocumentRow({ model: d });
+      this.el.append(d.rowView.render().el);
+    },
+
     render: function(documents) {
-      var element = this.el;
+      var documentList = this;
       documents.each(function(d) {
-        d.rowView = new DocumentRow({ model: d });
-        element.append(d.rowView.render().el);
+        documentList.addDocument(d);
       });
+
+      // Open the first document by default
+      documents.first().rowView.open();
     }
   });
 
-  new DocumentList();
+  DocumentControls = Backbone.View.extend({
+    el: $('#controls'),
+
+    events: {
+      'click #save-button': 'save'
+    },
+
+    initialize: function(model) {
+      _.bindAll(this, 'save', 'showHTML');
+      this.model = model;
+    },
+
+    save: function(e) {
+      this.model.set({
+        title: $('input.title').val(),
+        data: $('#editor').val()
+      });
+      
+      this.model.save();
+      this.model.rowView.render();
+      e.preventDefault();
+    },
+
+    showHTML: function(e) {
+      e.preventDefault();
+      // TODO
+    }
+  });
+
+  ListToolBar = Backbone.View.extend({
+    el: $('#left .toolbar'),
+
+    events: {
+      'click #create-document': 'add',
+      'click #delete-document': 'remove'
+    },
+
+    initialize: function(model) {
+      _.bindAll(this, 'add', 'remove');
+      this.model = model;
+    },
+
+    add: function(e) {
+      e.preventDefault();
+      var d = new Document({ title: 'Untitled Document', data: '' });
+      d.save();
+      Documents.add(d);
+      appView.documentList.addDocument(d);
+      d.rowView.open();
+    },
+
+    remove: function(e) {
+      e.preventDefault();
+      if (confirm('Are you sure you want to delete that document?')) {
+        this.model.rowView.remove();
+        this.model.destroy();
+      }
+    }
+  });
+
+  AppView = Backbone.View.extend({
+    initialize: function() {
+      this.documentList = new DocumentList();
+    }
+  });
+
+  var appView = new AppView();
   window.Documents = Documents;
-
-  //Documents.fetch();
-
-  // Easily get an item's database ID based on an id attribute
-  /*
-  $.fn.itemID = function() {
-    try {
-      var items = $(this).attr('id').split('-');
-      return items[items.length - 1];
-    } catch (exception) {
-      return null;
-    }
-  };
-
-  $.put = function(url, data, success) {
-    data._method = 'PUT';
-    $.post(url, data, success, 'json');
-  };
-
-  $('#delete-document').click(function(e) {
-    e.preventDefault();
-    if (confirm('Are you sure you want to delete that document?')) {
-      var element = $(this),
-          form = $('<form></form>');
-      form
-        .attr({
-          method: 'POST',
-          action: '/documents/' + $('#document-list .selected').itemID()
-        })
-        .hide()
-        .append('<input type="hidden" />')
-        .find('input')
-        .attr({
-          'name': '_method',
-          'value': 'delete'
-        })
-        .end()
-        .appendTo('body')
-        .submit();
-    }
-  });
 
   $('#logout').click(function(e) {
     e.preventDefault();
@@ -149,8 +179,6 @@
         .submit();
     }
   });
-
-  */
 
   // Correct widths and heights based on window size
   function resize() {
@@ -184,59 +212,6 @@
     });
   }
 
-  /*
-  $('#document-list li a').live('click', function(e) {
-    var li = $(this);
-
-    $.get(this.href + '.json', function(data) {
-      $('#document-list .selected').removeClass('selected');
-      li.addClass('selected');
-      $('#editor').val(data.data);
-      $('.title').val(data.title);
-      $('#editor').focus();
-    });
-
-    e.preventDefault();
-  });
-
-  if ($('#document-list .selected').length == 0) {
-    $('#document-list li a').first().click();
-  }
-
-  $('#save-button').click(function() {
-    var id = $('#document-list .selected').itemID(),
-        params = { d: { data: $('#editor').val(), id: id, title: $('input.title').val() } };
-    $.put('/documents/' + id + '.json', params, function(data) {
-      // Saved, will return JSON
-      $('#document-title-' + id).html(data.title);
-    });
-  });
-
-  $('#create-document').click(function(e) {
-    $.post('/documents.json', { d: { data: '', title: 'Untitled Document' } }, function(new_doc) {
-      showDocuments([new_doc]);
-      $('#document-title-' + new_doc._id).click();
-    });
-    e.preventDefault();
-  });
-
-  $('#html-button').click(function() {
-    var container = $('#html-container');
-    if (container.is(':visible')) {
-      container.html('').hide();
-      $('#html-button').removeClass('active');
-    } else {
-      $('#save-button').click();
-      $('#html-button').addClass('active');
-      var id = $('#document-list .selected').itemID();
-      $.get('/documents/' + id + '.html', function(data) {
-        // Saved, will return JSON
-        container.html(data).show();
-      });
-    }
-  });
-  */
-
   function hideFlashMessages() {
     $(this).fadeOut();
   }
@@ -246,7 +221,9 @@
   }, 5000);
   $('.flash').click(hideFlashMessages);
 
+  // TODO: Convert to Backbone
   // Search bar
+  /*
   function showDocuments(results) {
     for (var i = 0; i < results.length; i++) {
       $('#document-list').append('<li><a id="document-title-' + results[i]._id + '" href="/documents/' + results[i]._id + '">' + results[i].title + '</a></li>');
@@ -292,6 +269,7 @@
     });
     e.preventDefault();
   });
+  */
 
   $(window).resize(resize);
   $(window).focus(resize);
