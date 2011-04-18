@@ -7,6 +7,7 @@ var express = require('express@2.2.2'),
     mailer = require('mailer@0.4.52'),
     stylus = require('stylus@0.11.10'),
     markdown = require('markdown@0.2.1').markdown,
+    connectTimeout = require('connect-timeout@0.0.1'),
     sys = require('sys'),
     path = require('path'),
     models = require('./models'),
@@ -74,6 +75,7 @@ app.configure(function() {
   app.use(express.favicon());
   app.use(express.bodyParser());
   app.use(express.cookieParser());
+  app.use(connectTimeout({ time: 10000 }));
   app.use(express.session({ store: mongoStore(app.set('db-uri')), secret: 'topsecret' }));
   app.use(express.logger({ format: '\x1b[1m:method\x1b[0m \x1b[33m:url\x1b[0m :response-time ms' }))
   app.use(express.methodOverride());
