@@ -1,12 +1,12 @@
-var express = require('express@2.0.0beta3'),
-    connect = require('connect@1.0.6'),
-    jade = require('jade@0.8.6'),
+var express = require('express@2.2.2'),
+    connect = require('connect@1.3.0'),
+    jade = require('jade@0.10.4'),
     app = module.exports = express.createServer(),
-    mongoose = require('mongoose@1.1.4'),
-    mongoStore = require('connect-mongodb@0.2.1'),
+    mongoose = require('mongoose@1.2.0'),
+    mongoStore = require('connect-mongodb@0.2.2'),
     mailer = require('mailer@0.4.52'),
-    stylus = require('stylus@0.7.4'),
-    markdown = require('markdown').markdown,
+    stylus = require('stylus@0.11.10'),
+    markdown = require('markdown@0.2.1').markdown,
     sys = require('sys'),
     path = require('path'),
     models = require('./models'),
@@ -403,6 +403,10 @@ app.post('/search.:format?', loadUser, function(req, res) {
         res.send(documents.map(function(d) {
           return { title: d.title, id: d._id };
         }));
+      break;
+
+      default:
+        res.send('Format not available', 400);
       break;
     }
   });

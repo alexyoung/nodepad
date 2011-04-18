@@ -9,7 +9,11 @@
     Collection: Documents,
 
     url: function() {
-      return this.get('id') ? '/documents/' + this.get('id') + '.json' : '/documents.json';
+      return this.urlWithFormat('json');
+    },
+
+    urlWithFormat: function(format) {
+      return this.get('id') ? '/documents/' + this.get('id') + '.' + format : '/documents.json';
     },
 
     display: function() {
@@ -92,7 +96,8 @@
     el: $('#controls'),
 
     events: {
-      'click #save-button': 'save'
+      'click #save-button': 'save',
+      'click #html-button': 'showHTML'
     },
 
     initialize: function(model) {
@@ -112,8 +117,19 @@
     },
 
     showHTML: function(e) {
+      var model = this.model;
       e.preventDefault();
-      // TODO
+      $.get(this.model.urlWithFormat('html'), function(data) {
+        console.log($(window).height());
+        $('#html-container').html(data);
+        $('#html-container').dialog({
+          title: model.get('title'),
+          autoOpen: true,
+          modal: true,
+          width: $(window).width() * 0.95,
+          height: $(window).height() * 0.90
+        });
+      });
     }
   });
 
