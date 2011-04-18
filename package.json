@@ -19,10 +19,9 @@
     "markdown": "0.2.1",
     "stylus": "0.11.10",
     "mailer": "0.4.52",
-    "connect-timeout", "0.0.1"
+    "connect-timeout": "0.0.1"
   },
   "bin": {
     "nodepad": "bin/nodepad.js"
   }
 }
-
