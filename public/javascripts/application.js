@@ -120,7 +120,6 @@
       var model = this.model;
       e.preventDefault();
       $.get(this.model.urlWithFormat('html'), function(data) {
-        console.log($(window).height());
         $('#html-container').html(data);
         $('#html-container').dialog({
           title: model.get('title'),
