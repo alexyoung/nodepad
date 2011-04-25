@@ -1,5 +1,7 @@
 (function() {
-  var Document, Documents, DocumentRow, DocumentList, DocumentControls, ListToolBar, AppView;
+  var Document, Documents, DocumentRow, DocumentList,
+      DocumentControls, ListToolBar, AppView,
+      SearchView;
 
   _.templateSettings = {
     interpolate: /\{\{(.+?)\}\}/g
@@ -71,8 +73,12 @@
     el: $('#document-list'),
     Collection: Documents,
 
+    events: {
+      'click #show-all': 'showAll',
+    },
+
     initialize: function() {
-      _.bindAll(this, 'render', 'addDocument');
+      _.bindAll(this, 'render', 'addDocument', 'showAll');
       this.Collection.bind('refresh', this.render);
     },
 
@@ -89,6 +95,13 @@
 
       // Open the first document by default
       documents.first().rowView.open();
+    },
+
+    showAll: function(e) {
+      e.preventDefault();
+      this.el.html('');
+      this.Collection.fetch();
+      appView.searchView.reset();
     }
   });
 
@@ -163,9 +176,60 @@
     }
   });
 
+  SearchView = Backbone.View.extend({
+    el: $('#header .search'),
+
+    events: {
+      'focus input[name="s"]': 'focus',
+      'blur input[name="s"]': 'blur',
+      'submit': 'submit'
+    },
+
+    initialize: function(model) {
+      _.bindAll(this, 'search', 'reset');
+    },
+
+    focus: function(e) {
+      var element = $(e.currentTarget);
+      if (element.val() === 'Search')
+        element.val('');
+    },
+
+    blur: function(e) {
+      var element = $(e.currentTarget);
+      if (element.val().length === 0)
+        element.val('Search');
+    },
+
+    submit: function(e) {
+      e.preventDefault();
+      this.search($('input[name="s"]').val());
+    },
+
+    reset: function() {
+      this.el.find("input[name='s']").val('Search');
+    },
+
+    search: function(value) {
+      $.post('/search.json', { s: value }, function(results) {
+        appView.documentList.el.html('<li><a id="show-all" href="#">Show All</a></li>');
+
+        if (results.length === 0) {
+          alert('No results found');
+        } else {
+          for (var i = 0; i < results.length; i++) {
+            var d = new Document(results[i]);
+            appView.documentList.addDocument(d);
+          }
+        }
+      }, 'json');
+    }
+  });
+
   AppView = Backbone.View.extend({
     initialize: function() {
       this.documentList = new DocumentList();
+      this.searchView = new SearchView();
     }
   });
 
@@ -235,56 +299,6 @@
     $('.flash').each(hideFlashMessages);
   }, 5000);
   $('.flash').click(hideFlashMessages);
-
-  // TODO: Convert to Backbone
-  // Search bar
-  /*
-  function showDocuments(results) {
-    for (var i = 0; i < results.length; i++) {
-      $('#document-list').append('<li><a id="document-title-' + results[i]._id + '" href="/documents/' + results[i]._id + '">' + results[i].title + '</a></li>');
-    }
-  }
-
-  function search(value) {
-    $.post('/search.json', { s: value }, function(results) {
-      $('#document-list').html('');
-      $('#document-list').append('<li><a id="show-all" href="#">Show All</a></li>');
-
-      if (results.length === 0) {
-        alert('No results found');
-      } else {
-        showDocuments(results);
-      }
-    }, 'json');
-  }
-
-  $('input[name="s"]').focus(function() {
-    var element = $(this);
-    if (element.val() === 'Search')
-      element.val('');
-  });
-
-  $('input[name="s"]').blur(function() {
-    var element = $(this);
-    if (element.val().length === 0)
-      element.val('Search');
-  });
-
-  $('form.search').submit(function(e) {
-    search($('input[name="s"]').val());
-    e.preventDefault();
-  });
-
-  $('#show-all').live('click', function(e) {
-    $.get('/documents/titles.json', function(results) {
-      $('#document-list').html('');
-      showDocuments(results);
-      if (results.length > 0)
-        $('#document-title-' + results[0]._id).click();
-    });
-    e.preventDefault();
-  });
-  */
 
   $(window).resize(resize);
   $(window).focus(resize);

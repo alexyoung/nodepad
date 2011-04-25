@@ -82,9 +82,9 @@ app.configure(function() {
   app.use(stylus.middleware({ src: __dirname + '/public' }));
   app.use(express.static(__dirname + '/public'));
   app.set('mailOptions', {
-    host:    'localhost',
-    port:    '25',
-    from:    'nodepad@example.com',
+    host: 'localhost',
+    port: '25',
+    from: 'nodepad@example.com'
   });
 });
 
