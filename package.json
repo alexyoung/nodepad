@@ -1,7 +1,7 @@
 {
   "name": "nodepad",
   "description": "A notepad written with Node",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "http://dailyjs.com",
   "author": "Alex R. Young (http://alexyoung.org)",
   "directories": {
