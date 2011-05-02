@@ -24,8 +24,13 @@ html
                 input(name='s', value='Search')
       !{flashMessages}
       != body
-    script(type='text/javascript', src='/javascripts/application.js')
+    script(type='text/javascript', src='/javascripts/flash.js')
     - if (typeof documents !== 'undefined')
+      script(type='text/javascript', src='/javascripts/documents.js')
+      script(type='text/javascript', src='/javascripts/resize.js')
       script(type='text/javascript')
-        Documents.refresh(!{JSON.stringify(documents)});
+        $(function() {
+          if (typeof Documents !== 'undefined')
+            Documents.refresh(!{JSON.stringify(documents)});
+        });
     

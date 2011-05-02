@@ -22,19 +22,9 @@ These are the libraries that the project requires:
 * "Jade":http://jade-lang.com/
 * "less":https://github.com/cloudhead/less.js
 
-This revision of the code has been tested with:
+See the package.json file for the versions of the dependencies I've tested with.
 
-* Node 0.2.4
-* Mongo 1.4.4 and 1.6.5
-* Mongoose 0.0.4
-* connect-mongodb 0.0.4
-* Express 1.0.0
-* Jade 0.6.0
-* Less 1.0.40
-* Stylus 0.5.1
-* node_mailer 0.4.52
-
-On Mac OS Snow Leopard and Debian Lenny.
+On Mac OS Snow Leopard and Debian Lenny/Squeeze.
 
 h3. Dependency Installation
 
@@ -43,7 +33,7 @@ Make sure you're running a mongo instance (type <code>mongod</code> if required)
 <pre>
 git clone git@github.com:alexyoung/nodepad.git nodepad
 cd nodepad
-npm install .
+npm install
 
 node app.js
 </pre>
