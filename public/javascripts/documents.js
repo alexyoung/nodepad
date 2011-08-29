@@ -32,7 +32,7 @@
   Documents.url = '/documents/titles.json';
   Documents.model = Document;
   Documents.comparator = function(d) {
-    return d.get('title').toLowerCase();
+    return d.get('title') && d.get('title').toLowerCase();
   };
 
   DocumentRow = Backbone.View.extend({
