@@ -397,7 +397,7 @@ app.del('/sessions', loadUser, function(req, res) {
 
 // Search
 app.post('/search.:format?', loadUser, function(req, res) {
-  Document.find({ user_id: req.currentUser.id, keywords: req.body.s ? req.body.s : null },
+  Document.find({ user_id: req.currentUser.id, keywords: req.body.s },
                 [], { sort: ['title', 'descending'] },
                 function(err, documents) {
     switch (req.params.format) {

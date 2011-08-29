@@ -32,7 +32,7 @@
   Documents.url = '/documents/titles.json';
   Documents.model = Document;
   Documents.comparator = function(d) {
-    return d.get('title');
+    return d.get('title').toLowerCase();
   };
 
   DocumentRow = Backbone.View.extend({
@@ -52,8 +52,7 @@
       $('#document-list .selected').removeClass('selected');
       $(this.el).addClass('selected');
       this.model.display();
-      this.controls = new DocumentControls(this.model),
-      this.toolbar = new ListToolBar(this.model);
+      appView.documentList.selectedDocument = this.model;
     },
 
     remove: function() {
@@ -78,13 +77,34 @@
     },
 
     initialize: function() {
-      _.bindAll(this, 'render', 'addDocument', 'showAll');
-      this.Collection.bind('refresh', this.render);
+      _.bindAll(this, 'render', 'addDocument', 'showAll', 'create');
+      this.Collection.bind('reset', this.render);
     },
 
     addDocument: function(d) {
+      var index = Documents.indexOf(d) + 1;
       d.rowView = new DocumentRow({ model: d });
-      this.el.append(d.rowView.render().el);
+      var el = this.el.find('li:nth-child(' + index + ')');
+      if (el.length) {
+        el.after(d.rowView.render().el);
+      } else {
+        this.el.append(d.rowView.render().el);
+      }
+    },
+
+    resort: function() {
+      Documents.sort({ silent: true });
+    },
+
+    create: function(title, data) {
+      this.selectedDocument.set({
+        title: title,
+        data: data
+      });
+      
+      this.selectedDocument.save();
+      this.selectedDocument.rowView.render();
+      this.resort();
     },
 
     render: function(documents) {
@@ -94,13 +114,21 @@
       });
 
       // Open the first document by default
-      documents.first().rowView.open();
+      if (!this.selectedDocument) {
+        this.openFirst();
+      }
+    },
+
+    openFirst: function() {
+      if (Documents.length) {
+        Documents.first().rowView.open();
+      }
     },
 
     showAll: function(e) {
       e.preventDefault();
       this.el.html('');
-      this.Collection.fetch();
+      Documents.fetch({ success: this.openFirst });
       appView.searchView.reset();
     }
   });
@@ -115,24 +143,32 @@
 
     initialize: function(model) {
       _.bindAll(this, 'save', 'showHTML');
-      this.model = model;
     },
 
     save: function(e) {
-      this.model.set({
-        title: $('input.title').val(),
-        data: $('#editor').val()
-      });
-      
-      this.model.save();
-      this.model.rowView.render();
       e.preventDefault();
+
+      var title = $('input.title').val(),
+          data = $('#editor').val();
+
+      if (!appView.documentList.selectedDocument) {
+        Documents.create({ title: title, data: data }, {
+          success: function(model) {
+            Documents.fetch();
+          }
+        });
+      } else {
+        appView.documentList.create(title, data);
+      }
     },
 
     showHTML: function(e) {
-      var model = this.model;
       e.preventDefault();
-      $.get(this.model.urlWithFormat('html'), function(data) {
+
+      var model = appView.documentList.selectedDocument,
+        html = model.urlWithFormat('html');
+
+      $.get(html, function(data) {
         $('#html-container').html(data);
         $('#html-container').dialog({
           title: model.get('title'),
@@ -155,7 +191,6 @@
 
     initialize: function(model) {
       _.bindAll(this, 'add', 'remove');
-      this.model = model;
     },
 
     add: function(e) {
@@ -165,13 +200,22 @@
       Documents.add(d);
       appView.documentList.addDocument(d);
       d.rowView.open();
+      $('#editor-container input.title').focus();
     },
 
     remove: function(e) {
       e.preventDefault();
+      var model = appView.documentList.selectedDocument;
+
+      if (!model) return;
       if (confirm('Are you sure you want to delete that document?')) {
-        this.model.rowView.remove();
-        this.model.destroy();
+        model.rowView.remove();
+        model.destroy();
+        Documents.remove(model);
+        appView.documentList.selectedDocument = null;
+        $('#editor-container input.title').val('');
+        $('#editor').val('');
+        $('#document-list li:visible:first a').click();
       }
     }
   });
@@ -230,11 +274,14 @@
     initialize: function() {
       this.documentList = new DocumentList();
       this.searchView = new SearchView();
+      this.toolbar = new ListToolBar();
+      this.documentControls = new DocumentControls();
     }
   });
 
   var appView = new AppView();
   window.Documents = Documents;
+  window.appView = appView;
 
   $('#logout').click(function(e) {
     e.preventDefault();
