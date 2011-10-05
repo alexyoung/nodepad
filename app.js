@@ -18,10 +18,16 @@ var express = require('express'),
     Settings = { development: {}, test: {}, production: {} },
     emails;
 
+function renderJadeFile(template, options) {
+  var fn = jade.compile(template, options);
+  return fn(options.locals);
+}
+
+
 emails = {
   send: function(template, mailOptions, templateOptions) {
     mailOptions.to = mailOptions.to;
-    jade.renderFile(path.join(__dirname, 'views', 'mailer', template), templateOptions, function(err, text) {
+    renderJadeFile(path.join(__dirname, 'views', 'mailer', template), templateOptions, function(err, text) {
       // Add the rendered Jade template to the mailOptions
       mailOptions.body = text;
 
