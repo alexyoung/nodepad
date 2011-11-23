@@ -1,38 +1,38 @@
-/**
-  * Run with expresso test/app.test.js
-  */
-
-var app = require('../app'),
+var app = require(__dirname + '/../app'),
     assert = require('assert'),
-    zombie = require('zombie'),
-    events = require('events'),
-    testHelper = require('./helper');
+    tobi = require('tobi'),
+    testHelper = require('./helper'),
+    browser = tobi.createBrowser(app);
 
-app.listen(3001);
-
-testHelper.models = [app.User];
-
-testHelper.setup(function() {
-  // Fixtures
-  var user = new app.User({'email' : 'alex@example.com', 'password' : 'test' });
-  user.save(function() {
-    testHelper.run(exports)
+describe('Sign in', function() {
+  before(function(done) {
+    testHelper.clear([app.User], function() {
+      var user = new app.User({'email' : 'alex@example.com', 'password' : 'test' });
+      user.save(done);
+      console.log('done');
+    });
   });
-});
 
-testHelper.tests = {
-  'test login': function() {
-    zombie.visit('http://localhost:3001/', function(err, browser, status) {
+  after(function(done) {
+    app.close();
+    done();
+  });
+
+  it('should allow valid users to sign in', function(done) {
+    // FIXME: tobi doesn't seem to work at the moment
+    browser.get('/sessions/new', function(res, $) {
+      console.log('got / page');
       // Fill email, password and submit form
-      browser.
-        fill('user[email]', 'alex@example.com').
-        fill('user[password]', 'test').
-        pressButton('Log In', function(err, browser, status) {
+      $('form#login')
+        .fill('user[email]', 'alex@example.com')
+        .fill('user[password]', 'test')
+        .submit(function(res, $) {
+          console.log('form submitted');
           // Form submitted, new page loaded.
           assert.equal(browser.text('#header a.destroy'), 'Log Out');
           testHelper.end();
+          done();
         });
     });
-  }
-};
-
+  });
+});

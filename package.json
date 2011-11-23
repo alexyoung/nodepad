@@ -1,7 +1,7 @@
 {
   "name": "nodepad",
   "description": "A notepad written with Node",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "http://dailyjs.com",
   "author": "Alex R. Young (http://alexyoung.org)",
   "directories": {
@@ -11,15 +11,19 @@
     "node": ">= 0.4.0"
   },
   "dependencies": {
-    "express": "2.4.x",
-    "mongoose": "2.0.3",
-    "stylus": "0.15.1",
-    "jade": "0.15.2",
-    "connect": "1.7.1",
-    "connect-mongodb": "1.0.0",
-    "markdown": "0.2.1",
-    "mailer": "0.4.52",
+    "express": "2.5.1",
+    "connect": "1.8.1",
+    "mongoose": "2.3.12",
+    "stylus": "0.18.0",
+    "jade": "0.18.0",
+    "connect-mongodb": "1.1.1",
+    "markdown": "0.3.1",
+    "mailer": "0.6.7",
     "connect-timeout": "0.0.1"
+  },
+  "devDependencies": {
+    "tobi": "0.3.2",
+    "mocha": "0.0.2"
   },
   "bin": {
     "nodepad": "bin/nodepad.js"
