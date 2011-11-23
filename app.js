@@ -23,7 +23,6 @@ function renderJadeFile(template, options) {
   return fn(options.locals);
 }
 
-
 emails = {
   send: function(template, mailOptions, templateOptions) {
     mailOptions.to = mailOptions.to;
@@ -66,10 +65,16 @@ app.dynamicHelpers(require('./helpers.js').dynamicHelpers);
 app.configure('development', function() {
   app.set('db-uri', 'mongodb://localhost/nodepad-development');
   app.use(express.errorHandler({ dumpExceptions: true }));
+  app.set('view options', {
+    pretty: true
+  });
 });
 
 app.configure('test', function() {
   app.set('db-uri', 'mongodb://localhost/nodepad-test');
+  app.set('view options', {
+    pretty: true
+  });  
 });
 
 app.configure('production', function() {
