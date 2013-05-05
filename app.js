@@ -87,7 +87,7 @@ app.configure(function() {
   app.use(express.bodyParser());
   app.use(express.cookieParser());
   app.use(connectTimeout({ time: 10000 }));
-  app.use(express.session({ store: new mongoStore(app.set('db-uri')), secret: 'topsecret' }));
+  app.use(express.session({ store: new mongoStore({url: app.set('db-uri')}), secret: 'topsecret' }));
   app.use(express.logger({ format: '\x1b[1m:method\x1b[0m \x1b[33m:url\x1b[0m :response-time ms' }))
   app.use(express.methodOverride());
   app.use(stylus.middleware({ src: __dirname + '/public' }));
