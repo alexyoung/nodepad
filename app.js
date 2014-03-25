@@ -427,7 +427,9 @@ app.post('/search.:format?', loadUser, function(req, res) {
 });
 
 if (!module.parent) {
-  app.listen(3000, 'localhost', function(){
-  console.log('Express server listening on port %d, environment: %s', app.address().port, app.settings.env)});
+  app.listen(3000, 'localhost', function() {
+    console.log('Express server listening on port %d, environment: %s', app.address().port, app.settings.env)
+  });
+  
   console.log('Using connect %s, Express %s, Jade %s', connect.version, express.version, jade.version);
 }
